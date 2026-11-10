@@ -80,6 +80,8 @@ as backup. Compute VWAP from the session's bars if no indicator is available.
 - To move a stop, Robinhood allows one close order per contract:
   **cancel_option_order -> get_option_orders until the cancel is confirmed -> place the new stop.**
   Never leave the position without a stop longer than that sequence takes.
+- Discretionary exits (early profit-take, time exit): cancel the stop, confirm the cancel, then close at
+  market immediately (or a limit >= $0.05 through the bid). Never a passive limit at a stale bid.
 - Early profit-take triggers: 2 lower 1-minute highs after a session high; 5-minute close
   below the 9-EMA (above for puts); option gives back 25% of its peak gain within 3 minutes.
 - Never use a fixed-% stop on a low-delta contract (see the 2026-11-09 lesson in the spec).

@@ -1,5 +1,5 @@
 {
-  "playbook_version": 1,
+  "playbook_version": 2,
   "tiers": {
     "3": {"name": "T1", "max_risk": 10},
     "4": {"name": "T2", "max_risk": 15},
