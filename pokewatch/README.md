@@ -20,7 +20,15 @@ on Discord or Telegram with a direct link to the retailer's own product page.
 | Scheduler: intervals, jitter, budgets, backoff, circuit breakers, job locks, recovery, heartbeat | ✅ |
 | Streamlit dashboard (7 pages) | ✅ |
 | Docker Compose (Postgres + worker + dashboard + backups), systemd unit, CI | ✅ written · Docker build not run (no Docker daemon in the dev sandbox) |
+| **macOS home install** (launchd services, keep-awake, daily backup) | ✅ `deploy/macos/install.sh` · service files validated in tests; not yet run on a real Mac |
 | Tests | 72 passing on SQLite **and** PostgreSQL 16 |
+
+## Run it on your Mac at home
+
+```bash
+cd pokewatch && ./deploy/macos/install.sh
+```
+Details, including how to stop the Mac from sleeping: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md#mac-at-home-launchd).
 
 ## Quick start (local)
 
