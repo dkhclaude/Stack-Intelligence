@@ -16,6 +16,8 @@ from __future__ import annotations
 import json
 import os
 import sys
+import time
+import urllib.error
 import urllib.request
 from datetime import datetime
 from pathlib import Path
@@ -65,12 +67,20 @@ def send(title: str, body: str) -> bool:
     server = os.environ.get("NTFY_SERVER", "https://ntfy.sh").rstrip("/")
     req = urllib.request.Request(f"{server}/{topic}", data=body.encode(), method="POST",
                                  headers={"Title": title, "Tags": "chart_with_upwards_trend"})
-    try:
-        with urllib.request.urlopen(req, timeout=10) as r:
-            return 200 <= r.status < 300
-    except Exception as e:  # network policy may block ntfy; never crash the trader
-        print(f"NTFY send failed: {e}", file=sys.stderr)
-        return False
+    # ntfy.sh rate-limits shared egress IPs (HTTP 429); back off and retry a few times.
+    for attempt, wait in enumerate((0, 10, 20, 30)):
+        time.sleep(wait)
+        try:
+            with urllib.request.urlopen(req, timeout=10) as r:
+                return 200 <= r.status < 300
+        except urllib.error.HTTPError as e:
+            print(f"NTFY send failed (try {attempt + 1}): {e}", file=sys.stderr)
+            if e.code != 429:
+                return False
+        except Exception as e:  # network policy may block ntfy; never crash the trader
+            print(f"NTFY send failed: {e}", file=sys.stderr)
+            return False
+    return False
 
 
 def main(argv: list[str]) -> int:
