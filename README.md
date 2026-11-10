@@ -33,3 +33,7 @@ My AI-assisted trading and investment research platform.
 3. Document investment theses.
 4. Track trade performance.
 5. Scale toward agentic trading.
+
+## Side projects
+
+- [`pokewatch/`](pokewatch/) — Project PokéWatch: Pokémon TCG release and restock monitoring agent (notification only).

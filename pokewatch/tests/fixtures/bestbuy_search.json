@@ -1,0 +1,17 @@
+{"from": 1, "to": 4, "total": 4, "currentPage": 1, "totalPages": 1,
+ "products": [
+  {"sku": 6606082, "name": "Pokémon - Trading Card Game: Scarlet & Violet Prismatic Evolutions Elite Trainer Box",
+   "upc": "820650859571", "salePrice": 49.99, "regularPrice": 49.99, "onlineAvailability": true,
+   "inStoreAvailability": false, "orderable": "Available", "releaseDate": "2025-01-17",
+   "image": "https://pisces.bbystatic.com/image2/BestBuy_US/images/products/6606/6606082_sd.jpg",
+   "categoryPath": [{"name": "Toys, Games & Collectibles"}, {"name": "Trading Cards"}]},
+  {"sku": 6600001, "name": "Pokémon - Trading Card Game: Surging Sparks Booster Bundle",
+   "upc": "820650858000", "salePrice": 26.99, "regularPrice": 26.99, "onlineAvailability": false,
+   "inStoreAvailability": false, "orderable": "SoldOut", "releaseDate": "2024-11-08"},
+  {"sku": 6600002, "name": "Pokémon - Trading Card Game: Charizard ex Premium Collection",
+   "salePrice": 39.99, "regularPrice": 39.99, "onlineAvailability": false,
+   "inStoreAvailability": false, "orderable": "PreOrder", "releaseDate": "2099-01-01"},
+  {"sku": 6600003, "name": "Pokémon Scarlet - Nintendo Switch",
+   "salePrice": 59.99, "regularPrice": 59.99, "onlineAvailability": true,
+   "inStoreAvailability": true, "orderable": "Available"}
+ ]}

@@ -1,0 +1,20 @@
+name: PokeWatch CI
+# Tests only. GitHub Actions is NOT the monitoring engine (see pokewatch/docs/DEPLOYMENT.md).
+on:
+  push:
+    paths: ["pokewatch/**", ".github/workflows/pokewatch-ci.yml"]
+  pull_request:
+    paths: ["pokewatch/**", ".github/workflows/pokewatch-ci.yml"]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pokewatch
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt && pip install --no-deps -e .
+      - run: python -m pytest -q
