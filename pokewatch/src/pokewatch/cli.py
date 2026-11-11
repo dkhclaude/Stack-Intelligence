@@ -159,6 +159,32 @@ def cmd_check_store(a):
         print("\nRestart the worker to pick up new stores:  launchctl kickstart -k gui/$(id -u)/com.pokewatch.worker")
 
 
+def cmd_telegram_setup(a):
+    """Interactive Telegram setup: token -> detect chat -> save to .env -> test message."""
+    import getpass
+
+    from .config import PROJECT_ROOT
+    from .telegram_setup import SetupError, TelegramSetup, set_env_values
+    print("Telegram setup\n"
+          "  1. In Telegram, open a chat with @BotFather and send:  /newbot\n"
+          "  2. Give it any name, then a username ending in 'bot' (e.g. pokewatch_alerts_bot)\n"
+          "  3. BotFather replies with a token like 123456789:AAH...  Copy it.\n")
+    token = a.token or getpass.getpass("Paste the token and press Enter (it stays hidden while you paste): ")
+    try:
+        ts = TelegramSetup(token)
+        username = ts.bot_username()
+        print(f"\nFound your bot: @{username}")
+        print(f"Now on your iPhone open  https://t.me/{username}  and tap START (or send 'hi').")
+        print("Waiting for your message (up to 2 minutes)...")
+        chat_id, name = ts.find_chat(wait_s=a.wait)
+        set_env_values(PROJECT_ROOT / ".env", {"TELEGRAM_BOT_TOKEN": ts.token, "TELEGRAM_CHAT_ID": chat_id})
+        ts.send_test(chat_id)
+    except SetupError as e:
+        sys.exit(f"\nSetup not finished: {e}")
+    print(f"\nConnected to {name}'s chat and saved to .env. A test message was sent to your phone.\n"
+          "Restart the worker so it uses Telegram:  launchctl kickstart -k gui/$(id -u)/com.pokewatch.worker")
+
+
 def cmd_demo(a):
     from .demo import build_demo
     path = build_demo(a.path)
@@ -192,6 +218,10 @@ def main(argv=None):
     cs.add_argument("urls", nargs="+", help="store website(s), e.g. https://example-cards.com")
     cs.add_argument("--add", action="store_true", help="add usable stores to .env")
     cs.set_defaults(fn=cmd_check_store)
+    tg = sub.add_parser("telegram-setup", help="guided Telegram setup (finds your chat id automatically)")
+    tg.add_argument("--token", help=argparse.SUPPRESS)
+    tg.add_argument("--wait", type=int, default=120, help=argparse.SUPPRESS)
+    tg.set_defaults(fn=cmd_telegram_setup)
     d = sub.add_parser("demo", help="build a simulated-data DB to preview the dashboard")
     d.add_argument("--path", default="data/demo.db")
     d.set_defaults(fn=cmd_demo)
