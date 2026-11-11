@@ -62,12 +62,14 @@ as backup. Compute VWAP from the session's bars if no indicator is available.
 ## 4. Entry checklist
 
 1. Identify the setup (spec section 6) and the **structural invalidation** level on the underlying.
+   (v3: below the base/flag low or latest higher low, minus $0.05 - never just under the breakout level.)
 2. Score the six factors honestly; write down why each is 0 or 1.
 3. Pick the contract: `get_option_chains` / `get_option_instruments` for today's expiry,
    `get_option_quotes` for bid/ask/delta/IV. Bull flag: 3-4 strikes OTM, delta ~0.18-0.25,
    premium ~$0.35-0.45. Single-name puts: name < VWAP **and** sector red on 5m; skip if IV > 150% after a news gap.
 4. Run `engine.py size`. If `trade` is false, skip and stay silent.
 5. `review_option_order`, then `place_option_order` (limit at or near the ask, small size, one leg).
+   Re-check the order state in the same turn; the moment it fills, place the stop (no unprotected gap).
 6. On fill: place the protective stop (one close order per contract), then
    `notify.py fill` with score, factors, tier, max_risk, qty, price, stop.
 
