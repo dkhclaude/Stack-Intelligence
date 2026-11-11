@@ -58,6 +58,11 @@ Many online hobby and game stores run on Shopify, which PokéWatch can monitor w
 whether the store is usable, which Pokémon collection to watch, how many sealed Pokémon products it can see,
 and why not if the store isn't usable. Add `--add` to save usable stores into `.env`.
 
+### Adding stores stays quiet
+The first scan of a newly added store records all its current products silently and sends one summary message
+("now watching …: N products"). After that you only get alerts for changes: restocks, new listings, preorders and
+price drops. To turn this off, set `alerts.quiet_first_scan` to false.
+
 ### Telegram setup
 1. Message **@BotFather** → `/newbot` → copy the token into `TELEGRAM_BOT_TOKEN`.
 2. Send any message to your new bot, then open `https://api.telegram.org/bot<TOKEN>/getUpdates` and copy

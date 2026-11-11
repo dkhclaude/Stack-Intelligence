@@ -113,6 +113,28 @@ def build_channels(settings: Settings, transport=None) -> dict[str, Channel]:
                                 EmailChannel(settings, transport))}
 
 
+def notify_text(settings: Settings, text: str, transport=None) -> dict[str, str]:
+    """Send a short informational message (no product alert) to every configured chat channel."""
+    if settings.alerts_dry_run:
+        return {}
+    results = {}
+    for name, ch in build_channels(settings, transport).items():
+        if name == "email" or not ch.configured():
+            continue
+        try:
+            if name == "discord":
+                r = ch._post(settings.discord_webhook_url, json={"username": "PokéWatch", "content": text})
+                ok = r.status_code in (200, 204)
+            else:
+                r = ch._post(f"https://api.telegram.org/bot{settings.telegram_bot_token}/sendMessage",
+                             json={"chat_id": settings.telegram_chat_id, "text": text})
+                ok = r.status_code == 200
+            results[name] = "sent" if ok else f"failed: HTTP {r.status_code}"
+        except ChannelError as e:
+            results[name] = f"failed: {e}"
+    return results
+
+
 def send_test(settings: Settings, channel: str, transport=None) -> str:
     """Send an explicit test message (contains no product/inventory data)."""
     text = "PokéWatch test message — this channel is configured correctly. No product data in this message."

@@ -101,6 +101,8 @@ DEFAULT_RUNTIME = {
     },
     "alerts": {
         "cooldown_minutes": 30,
+        # first scan of a newly added store records everything silently and sends one summary
+        "quiet_first_scan": True,
         "min_price_drop_pct": 5.0,
         "price_drop_requires_availability": True,
         "include_marketplace": False,

@@ -8,7 +8,7 @@ import socket
 import time
 from datetime import timedelta
 
-from sqlalchemy import or_, select, update
+from sqlalchemy import func, or_, select, update
 
 from . import __version__, circuit, locks
 from .alerts import create_alerts, dispatch_pending
@@ -107,6 +107,9 @@ class Runner:
                 return job_id
             listings = [] if job == "discovery" else self._select(s, job, conn.code)
             pids = [l.retailer_product_id for l in listings]
+            baseline = (job == "discovery" and runtime["alerts"].get("quiet_first_scan", True)
+                        and s.scalar(select(func.count()).select_from(RetailerListing)
+                                     .where(RetailerListing.connector == conn.code)) == 0)
 
         if job != "discovery" and not pids:
             with session_scope() as s:
@@ -123,11 +126,19 @@ class Runner:
 
         with session_scope() as s:
             requested = [s.get(RetailerListing, l.id) for l in listings]
-            stats = ingest(s, conn, result, runtime, job_id=job_id, requested=requested)
+            stats = ingest(s, conn, result, runtime, job_id=job_id, requested=requested, baseline=baseline)
             alerts = 0
-            for listing, events in stats.events:
-                if create_alerts(s, listing, events, runtime):
-                    alerts += 1
+            summary = None
+            if baseline and stats.new_listings:
+                avail = sum(1 for l, _ in stats.events if l.current_state in ("IN_STOCK", "PREORDER"))
+                summary = (f"👀 PokéWatch is now watching {conn.name}: {stats.new_listings} Pokémon products recorded "
+                           f"({avail} available right now). From here on you'll only get alerts when something "
+                           f"changes: restocks, new listings, preorders and price drops.")
+                log_event(s, conn.code, "baseline_scan", summary)
+            else:
+                for listing, events in stats.events:
+                    if create_alerts(s, listing, events, runtime):
+                        alerts += 1
             mj = s.get(MonitoringJob, job_id)
             mj.finished_at = utcnow()
             mj.items_checked, mj.items_failed = stats.checked, stats.failed
@@ -137,11 +148,16 @@ class Runner:
                 mj.status, mj.error = "failed", f"{result.fatal.status}: {result.fatal.message}"
             else:
                 mj.status = "partial" if stats.failed else "ok"
+            if summary:
+                mj.error = "first scan: recorded quietly (no per-product alerts)"
             log.info("job finished", extra={"job": job, "connector": conn.code, "status": mj.status,
                                             "checked": stats.checked, "failed": stats.failed, "new": stats.new_listings,
                                             "events": stats.event_count, "alerts": alerts,
                                             "skipped_non_tcg": stats.skipped_non_tcg,
                                             "secs": round(time.monotonic() - t0, 2)})
+        if summary:
+            from .alerts.channels import notify_text
+            notify_text(self.settings, summary, transport=self.alert_transport)
         return job_id
 
     def release_sync(self) -> int:
