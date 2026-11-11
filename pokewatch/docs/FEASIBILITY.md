@@ -34,5 +34,7 @@ It's the only Priority-1 retailer with an official, documented availability API.
 coming-soon states and UPCs, which make cross-retailer matching reliable. One batched call checks up to 100 SKUs, so
 5-minute priority checks fit easily within the quota.
 
-**If Best Buy declines a Gmail-based key**, start with 1–3 reputable Shopify hobby stores (no key needed) while
-you request a key with a non-free email address (for example, a custom domain).
+**If Best Buy declines a Gmail-based key**, start with reputable Shopify hobby stores (no key needed), using
+`pokewatch check-store <url> --add` to vet each one. To get a Best Buy key later, an address on your own domain
+works: a domain costs about $10/year, and free email forwarding (for example Cloudflare Email Routing) delivers
+its mail to your existing inbox.

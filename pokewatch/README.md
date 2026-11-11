@@ -39,6 +39,7 @@ pip install -r requirements-dev.txt && pip install --no-deps -e .
 cp .env.example .env          # add BESTBUY_API_KEY and DISCORD_WEBHOOK_URL (or TELEGRAM_*)
 
 pokewatch init-db
+pokewatch check-store https://some-card-shop.com --add   # no API key needed (Shopify stores)
 pokewatch connectors                       # what is supported / configured
 pokewatch verify bestbuy                   # one REAL request; marks the connector live-verified on success
 pokewatch test-alert discord               # labelled test message
@@ -50,6 +51,12 @@ streamlit run dashboard/app.py             # dashboard at http://localhost:8501
 
 **Preview the dashboard without credentials:** `pokewatch demo` builds `data/demo.db` with *simulated* stores
 (clearly bannered, nothing is sent), then run `DATABASE_URL=sqlite:///data/demo.db streamlit run dashboard/app.py`.
+
+### No Best Buy key? Use card shops instead
+Many online hobby and game stores run on Shopify, which PokéWatch can monitor with no API key.
+`pokewatch check-store <url> [<url> ...]` checks each one with requests the store allows. It reports
+whether the store is usable, which Pokémon collection to watch, how many sealed Pokémon products it can see,
+and why not if the store isn't usable. Add `--add` to save usable stores into `.env`.
 
 ### Telegram setup
 1. Message **@BotFather** → `/newbot` → copy the token into `TELEGRAM_BOT_TOKEN`.

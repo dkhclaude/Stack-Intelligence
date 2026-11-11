@@ -134,6 +134,31 @@ def cmd_health(a):
     sys.exit(0 if status["healthy"] else 1)
 
 
+def cmd_check_store(a):
+    """Check whether a store can be monitored; optionally add it to .env."""
+    from .config import PROJECT_ROOT
+    from .store_finder import add_to_env, check_store
+    for url in a.urls:
+        r = check_store(url, get_settings())
+        print(f"\n{r.domain}")
+        if r.collections:
+            print("  Pokémon collections: " + ", ".join(f"{h} ({n if n is not None else '?'})" for h, _, n in r.collections))
+        for line in r.samples:
+            print("   ", line)
+        if not r.ok:
+            print(f"  NOT USABLE: {r.problem}")
+            continue
+        print(f"  USABLE: {r.tcg_listings} Pokémon TCG listings visible, {r.in_stock} available now "
+              f"(collection: {r.chosen_collection or 'all'})")
+        if a.add:
+            value = add_to_env(r.config_line, PROJECT_ROOT / ".env")
+            print(f"  Added to .env -> SHOPIFY_STORES={value}")
+        else:
+            print(f"  To monitor it, re-run with --add (or put this in SHOPIFY_STORES): {r.config_line}")
+    if a.add:
+        print("\nRestart the worker to pick up new stores:  launchctl kickstart -k gui/$(id -u)/com.pokewatch.worker")
+
+
 def cmd_demo(a):
     from .demo import build_demo
     path = build_demo(a.path)
@@ -163,6 +188,10 @@ def main(argv=None):
     t.add_argument("channel", choices=["discord", "telegram", "email"])
     t.set_defaults(fn=cmd_test_alert)
     sub.add_parser("health", help="exit 0 if worker heartbeat is fresh").set_defaults(fn=cmd_health)
+    cs = sub.add_parser("check-store", help="check whether online stores can be monitored (Shopify, robots.txt allowed)")
+    cs.add_argument("urls", nargs="+", help="store website(s), e.g. https://example-cards.com")
+    cs.add_argument("--add", action="store_true", help="add usable stores to .env")
+    cs.set_defaults(fn=cmd_check_store)
     d = sub.add_parser("demo", help="build a simulated-data DB to preview the dashboard")
     d.add_argument("--path", default="data/demo.db")
     d.set_defaults(fn=cmd_demo)
