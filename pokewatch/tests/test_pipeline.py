@@ -43,7 +43,8 @@ class BB:
 def runner(router):
     from pokewatch.settings_store import save_runtime_override
     with session_scope() as s:  # tests run scans back-to-back
-        save_runtime_override(s, {"connectors": {"bestbuy": {"min_interval_s": 0}}})
+        save_runtime_override(s, {"connectors": {"bestbuy": {"min_interval_s": 0}},
+                                  "alerts": {"quiet_first_scan": False}})
     return Runner(transport=router.transport, alert_transport=router.transport, sleep=nosleep)
 
 
@@ -177,3 +178,55 @@ def test_release_sync(settings, router, tmp_path):
     runner(router).run("release_sync")
     runner(router).run("release_sync")
     assert count(ReleaseCalendar, ReleaseCalendar.source_name == "pokemontcg_io") == 2
+
+
+def quiet_runner(router):
+    from pokewatch.settings_store import save_runtime_override
+    with session_scope() as s:
+        save_runtime_override(s, {"connectors": {"bestbuy": {"min_interval_s": 0}}})  # quiet_first_scan default on
+    return Runner(transport=router.transport, alert_transport=router.transport, sleep=nosleep)
+
+
+def test_quiet_first_scan_sends_one_summary_then_alerts_on_changes(settings, router):
+    bb = BB(router)
+    r = quiet_runner(router)
+    r.run("discovery")
+    # everything recorded, no per-product alerts, exactly one summary message
+    assert count(RetailerListing) == 3 and count(Alert) == 0
+    assert len(bb.discord) == 1 and "now watching Best Buy: 3 Pokémon products" in bb.discord[0]["content"]
+    assert "(2 available right now)" in bb.discord[0]["content"]  # ETB in stock + Charizard preorder
+    # baseline does not count existing stock as "now available"
+    assert count(ListingEvent, ListingEvent.event_type == "NOW_AVAILABLE") == 0
+    assert count(ListingEvent, ListingEvent.event_type == "NEW_LISTING") == 3
+
+    # second scan: real changes alert normally, and no second summary
+    bb.data["products"].append({"sku": 6600009, "name": "Pokémon - Trading Card Game: Destined Rivals Booster Bundle",
+                                "salePrice": 26.99, "onlineAvailability": True, "inStoreAvailability": False,
+                                "orderable": "Available"})
+    bb.set(6600001, onlineAvailability=True, orderable="Available")  # sold-out bundle comes back
+    r.run("discovery")
+    embeds = [m["embeds"][0] for m in bb.discord if "embeds" in m]
+    assert len([m for m in bb.discord if "content" in m]) == 1
+    assert any("Destined Rivals" in e["title"] for e in embeds)
+    assert any("Surging Sparks" in e["title"] for e in embeds)
+
+
+def test_quiet_first_scan_is_per_store(settings, router, monkeypatch):
+    """A store added later gets its own quiet first scan even though another store already has listings."""
+    bb = BB(router)
+    r = quiet_runner(router)
+    r.run("discovery")
+    assert len(bb.discord) == 1
+    monkeypatch.setenv("SHOPIFY_STORES", "Test Cards|shop.test|pokemon")
+    from pokewatch import config
+    config.reset_settings()
+    router.add("shop.test/robots.txt", httpx.Response(200, text=""))
+    router.add("shop.test/collections/pokemon/products.json", httpx.Response(200, json=load("shopify_products.json")))
+    from pokewatch.settings_store import save_runtime_override
+    with session_scope() as s:
+        save_runtime_override(s, {"connectors": {"shopify": {"min_interval_s": 0}}})
+    r2 = Runner(transport=router.transport, alert_transport=router.transport, sleep=nosleep)
+    r2.run("discovery")
+    summaries = [m["content"] for m in bb.discord if "content" in m]
+    assert len(summaries) == 2 and "now watching Test Cards" in summaries[1]
+    assert count(Alert) == 0

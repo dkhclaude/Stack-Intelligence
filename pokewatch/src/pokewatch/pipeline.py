@@ -21,7 +21,7 @@ from .db.models import (
     RetailerConnector,
     RetailerListing,
 )
-from .domain import CheckResult, CheckStatus, ListingSnapshot, ReleaseInfo, StockState, utcnow
+from .domain import CheckResult, CheckStatus, EventType, ListingSnapshot, ReleaseInfo, StockState, utcnow
 from .normalize import link_listing
 from .pricing import market_median, price_flag
 from .settings_store import log_event
@@ -70,12 +70,15 @@ def _unknown_observation(session: Session, listing: RetailerListing, status: Che
 
 
 def _apply_snapshot(session: Session, listing: RetailerListing, snap: ListingSnapshot, job_id: int | None,
-                    runtime: dict, is_new: bool) -> list[ListingEvent]:
+                    runtime: dict, is_new: bool, baseline: bool = False) -> list[ListingEvent]:
     now = snap.observed_at
     prior = None if is_new else PriorState(
         StockState(listing.last_confirmed_state) if listing.last_confirmed_state else None,
         bool(listing.ever_in_stock), listing.current_price)
     detected: list[DetectedEvent] = detect_events(prior, snap.state, snap.price)
+    if baseline and is_new:
+        # first scan of a store: existing stock is not "now available" news
+        detected = [d for d in detected if d.type == EventType.NEW_LISTING]
 
     # descriptive fields (retailers edit titles/images over time)
     listing.title, listing.url = snap.title, snap.url
@@ -130,7 +133,8 @@ def _apply_snapshot(session: Session, listing: RetailerListing, snap: ListingSna
 
 
 def ingest(session: Session, connector: Connector, result: CheckResult, runtime: dict,
-           job_id: int | None = None, requested: list[RetailerListing] | None = None, ai=None) -> IngestStats:
+           job_id: int | None = None, requested: list[RetailerListing] | None = None, ai=None,
+           baseline: bool = False) -> IngestStats:
     stats = IngestStats()
     ai_cfg = runtime.get("ai", {})
     if ai is None and ai_cfg.get("enabled"):
@@ -176,7 +180,7 @@ def ingest(session: Session, connector: Connector, result: CheckResult, runtime:
             session.add(listing)
             session.flush()
             stats.new_listings += 1
-        events = _apply_snapshot(session, listing, snap, job_id, runtime, is_new)
+        events = _apply_snapshot(session, listing, snap, job_id, runtime, is_new, baseline)
         stats.checked += 1
 
         product = session.get(Product, listing.product_id) if listing.product_id else None

@@ -70,3 +70,15 @@ def test_rule_filters():
     assert not _rule_matches(AlertRule(**{**base, "event_types": ["PRICE_DROP"]}), l, EventType.RESTOCKED)
     l.is_marketplace = True
     assert not _rule_matches(AlertRule(**base), l, EventType.RESTOCKED)
+
+
+def test_notify_text_reaches_telegram(settings, monkeypatch, router):
+    from pokewatch import config
+    from pokewatch.alerts.channels import notify_text
+    monkeypatch.delenv("DISCORD_WEBHOOK_URL")
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "123:abc")
+    monkeypatch.setenv("TELEGRAM_CHAT_ID", "42")
+    config.reset_settings()
+    router.add("api.telegram.org/bot123:abc/sendMessage", httpx.Response(200, json={"ok": True}))
+    assert notify_text(config.get_settings(), "hello", transport=router.transport) == {"telegram": "sent"}
+    assert json.loads(router.calls[0].content) == {"chat_id": "42", "text": "hello"}
