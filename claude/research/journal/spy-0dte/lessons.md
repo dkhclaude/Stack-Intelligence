@@ -49,3 +49,18 @@ Robinhood cross-check: all 7 fills match the journal (760C 0.25→0.39; 761C x3 
 **Skipped.** 08:26 HOD break (score 4, 761C sized 0; the only fit was a 0.12-delta 762C at a whole-premium stop — correctly not contract-shopped). 09:22 SPY 761 break (score 4, volume 1.44x) — also untradeable: buying power $8.91 because same-day sale proceeds don't settle in a cash account. Kevin's $300 deposit arrived after the 10:15 cutoff.
 
 **Rule change:** v3 — initial stops go below the base/flag low (or latest higher low) with a $0.05 buffer, never just under the breakout level; size down or skip if it doesn't fit (evidence: trades 2 vs 3). No dollar amounts, limits or tiers changed.
+
+## 2026-11-12 — 1 trade, 1 win, +$20 — playbook v3
+
+Robinhood cross-check: both fills match the journal (764C 0.49 -> 0.69 stop). Account $876.54 after Kevin's $300 deposit.
+
+| # | Contract | Score / tier | Factors | Entry → exit | P&L | Process grade | Outcome |
+|---|----------|--------------|---------|--------------|-----|---------------|---------|
+| 1 | SPY 764C x1 | 5/6 T3 ($25) | trend, structure, key_level, breadth, time | 0.49 → 0.69 | +$20 | **A−** | Good |
+
+**Trade 1 (764C).** Entry was a textbook pullback-to-structure: after the 07:57 trend leg, SPY pulled back to 759.98, held above the 759.6–760.0 breakout zone, and turned up with QQQ/SMH (08:05). v3 stop below the pullback low (759.93); engine sized 1 contract ($21 risk). The limit was checked 20 s after placing; the stop went in 18 s after the fill. Volume was correctly scored 0. Management: the 08:12 check fired ~3 min late and saw 0.955, but the option had closed at **1.02 at 08:11** (option historicals). Under the ladder the stop should have been the 75% trail (0.76), not the +40% lock (0.69); the exit came at 0.69 vs ~0.76 available. Replay check: a looser ladder would not have helped. The option rebounded to 1.04 at 08:20, then fell to 0.22 by 08:41.
+*Lesson:* late checks understate the peak; read the bars since the last check. → **Rule change v4.**
+
+**Skips (all correct by the rules).** 06:51 break (score 4, $33/contract stop vs $15 cap); 07:54 762C limit cancelled unfilled as the option ran 0.42 → 0.52 (no chase, no resting entry; this avoided the 11-11 unprotected-fill problem); 07:57–08:00 legs extended > $1 from structure; 08:20–08:23 double top at 763.0 on light volume; 08:47 bounce score 4 with QQQ/SMH diverging; 08:53 score 3 (761.19 is not a qualifying key level); 09:00–10:07 dead chop. Missed upside was real (SPY ran 757.8 → 763.0), but each skip followed the score/size rules. Rechecking the "wicked ladder" pattern with option bars shows the ladder protected gains today, so the earlier wick pattern is now weaker evidence than it looked.
+
+**Rule change:** v4: the ladder peak mark includes the highest 1-minute option close since the previous check. No dollar amounts, limits or tiers changed.

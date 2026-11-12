@@ -78,7 +78,8 @@ as backup. Compute VWAP from the session's bars if no indicator is available.
 - Poll every **1 minute** near a breakout or near a stop/target, every **2 minutes** otherwise.
   Between turns use `send_later` (delay 1-2 min) with a message like
   "SPY 0DTE: manage <symbol>, entry X, stop Y, peak Z, contracts N" so the next turn has the state.
-- Track the **peak mark**. Each check: `engine.py stop` and `engine.py scale`.
+- Track the **peak mark** = max(current mark, highest 1-minute option close since the last check via
+  `get_option_historicals`; v4). Each check: `engine.py stop` and `engine.py scale`.
 - To move a stop, Robinhood allows one close order per contract:
   **cancel_option_order -> get_option_orders until the cancel is confirmed -> place the new stop.**
   Never leave the position without a stop longer than that sequence takes.
