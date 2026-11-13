@@ -64,3 +64,22 @@ Robinhood cross-check: both fills match the journal (764C 0.49 -> 0.69 stop). Ac
 **Skips (all correct by the rules).** 06:51 break (score 4, $33/contract stop vs $15 cap); 07:54 762C limit cancelled unfilled as the option ran 0.42 → 0.52 (no chase, no resting entry; this avoided the 11-11 unprotected-fill problem); 07:57–08:00 legs extended > $1 from structure; 08:20–08:23 double top at 763.0 on light volume; 08:47 bounce score 4 with QQQ/SMH diverging; 08:53 score 3 (761.19 is not a qualifying key level); 09:00–10:07 dead chop. Missed upside was real (SPY ran 757.8 → 763.0), but each skip followed the score/size rules. Rechecking the "wicked ladder" pattern with option bars shows the ladder protected gains today, so the earlier wick pattern is now weaker evidence than it looked.
 
 **Rule change:** v4: the ladder peak mark includes the highest 1-minute option close since the previous check. No dollar amounts, limits or tiers changed.
+
+## 2026-11-13 — no trades, $0 — playbook v5 (first SPY + QQQ day)
+
+Robinhood cross-check: no option orders on 759470560 today; account $896.45 cash, flat. Journal summary matches.
+
+**No trades.** Nothing to grade on process vs outcome. Skips, each checked against the rules:
+- 08:21 QQQ LOD break (1.66x): reversed at once, and the check fired late anyway.
+- 08:51 SPY put: score 3, stop ~$26 > $10 → 0 contracts.
+- 09:06 VWAP reclaim: seen at 09:10 as a chase, and its risk didn't fit T2. It failed 09:11–13.
+- 09:15 breakdown: 0.85x volume.
+- 09:26 QQQ: score 3, ~$37 risk.
+- 09:35 SPY call: score 4, $16 risk vs the $15 cap. It double-topped and would have stopped out at 09:39 for about −$16, so the cap protected the account.
+- 10:02 SPY/QQQ breakdown: score 4, 2.0x volume, reclaimed at 10:03 before the late check ran.
+
+**What cost opportunity was operational, not the rules.** The Robinhood 502 outage (06:20–07:12) covered most of the trend-down open (SPY 760 → 747.9). MCP disconnects made checks fire 3–22 min late all morning. After 09:13 the market was VWAP chop, where structural stops were mostly wider than the T1/T2 caps — the playbook correctly stood aside.
+
+**Evidence to keep collecting (no change today):** whether late check-ins should get a "trigger bar must be ≤ 1 bar old" rule spelled out in the spec (it was applied by judgment at 09:10 and 10:05).
+
+**Rule change:** none (no trades — per the review spec, no rule change). No dollar amounts, limits or tiers changed.
