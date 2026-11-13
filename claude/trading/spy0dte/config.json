@@ -1,0 +1,25 @@
+{
+  "playbook_version": 5,
+  "underlyings": ["SPY", "QQQ"],
+  "max_open_positions": 2,
+  "tiers": {
+    "3": {"name": "T1", "max_risk": 10},
+    "4": {"name": "T2", "max_risk": 15},
+    "5": {"name": "T3", "max_risk": 25},
+    "6": {"name": "T4", "max_risk": 35}
+  },
+  "daily_loss": {"base": 40, "profit_share": 0.5, "max": 75},
+  "max_account_fraction_per_trade": 0.30,
+  "losing_streak_cap": {"streak": 2, "tier": "T1"},
+  "volume_multiple": 1.5,
+  "time_window_pt": ["06:45", "09:00"],
+  "out_by_pt": "10:30",
+  "flat_by_pt": "12:30",
+  "ladder": [
+    {"peak_gain": 0.30, "lock_gain": 0.00},
+    {"peak_gain": 0.50, "lock_gain": 0.25},
+    {"peak_gain": 0.80, "lock_gain": 0.40}
+  ],
+  "trail": {"from_peak_gain": 1.00, "fraction_of_peak": 0.75, "min_step": 0.03},
+  "scale_out": {"min_contracts": 2, "at_gain": 0.50, "fraction": 0.5}
+}
