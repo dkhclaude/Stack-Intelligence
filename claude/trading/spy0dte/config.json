@@ -1,5 +1,7 @@
 {
-  "playbook_version": 4,
+  "playbook_version": 5,
+  "underlyings": ["SPY", "QQQ"],
+  "max_open_positions": 2,
   "tiers": {
     "3": {"name": "T1", "max_risk": 10},
     "4": {"name": "T2", "max_risk": 15},

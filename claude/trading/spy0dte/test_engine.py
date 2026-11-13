@@ -77,6 +77,18 @@ class Size(unittest.TestCase):
         put = {**self.base, "side": "put", "stop_underlying": 601}
         self.assertTrue(e.size(put)["trade"])
 
+    def test_open_position_limits(self):
+        r = e.size({**self.base, "open_positions": 2})
+        self.assertFalse(r["trade"])
+        self.assertIn("max open positions", r["reason"])
+        r = e.size({**self.base, "open_positions": 1, "open_risk": 25})  # room 40-25=15 < $20
+        self.assertFalse(r["trade"])
+        r = e.size({**self.base, "open_positions": 1, "open_risk": 15})  # room 25 -> 1 contract
+        self.assertEqual(r["contracts"], 1)
+        r = e.size({**self.base, "open_positions": 1, "open_premium": 120})  # 150-120=30 < $40 premium
+        self.assertEqual(r["contracts"], 0)
+        self.assertIn("30%", r["reason"])
+
     def test_no_trade_low_score(self):
         self.assertFalse(e.size({**self.base, "factors": factors(2)})["trade"])
 

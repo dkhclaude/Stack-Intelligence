@@ -19,6 +19,9 @@ spec and config disagree, follow the spec and flag the mismatch to Kevin.
 
 - Robinhood **agentic account only** (`get_accounts` -> the one tradable account, nickname "MCP").
   Never act on any other account.
+- **Underlyings: SPY and QQQ 0DTE** (v5). No SPX, no leveraged/inverse ETFs. Up to 2 open positions,
+  one per underlying; pass `open_positions`, `open_risk` and `open_premium` to `engine.py size` when
+  another position is open.
 - **Long single-leg calls and puts only.** `place_option_order` with one leg, `side: buy` to open,
   `side: sell` to close. No spreads, no shorts, no equities.
 - **One trader.** Never spawn agents that place orders. Do all order work in this session.
@@ -65,7 +68,7 @@ as backup. Compute VWAP from the session's bars if no indicator is available.
    (v3: below the base/flag low or latest higher low, minus $0.05 - never just under the breakout level.)
 2. Score the six factors honestly; write down why each is 0 or 1.
 3. Pick the contract: `get_option_chains` / `get_option_instruments` for today's expiry,
-   `get_option_quotes` for bid/ask/delta/IV. Bull flag: 3-4 strikes OTM, delta ~0.18-0.25,
+   `get_option_quotes` for bid/ask/delta/IV. SPY or QQQ bull flag: 3-4 strikes OTM, delta ~0.18-0.25,
    premium ~$0.35-0.45. Single-name puts: name < VWAP **and** sector red on 5m; skip if IV > 150% after a news gap.
 4. Run `engine.py size`. If `trade` is false, skip and stay silent.
 5. `review_option_order`, then `place_option_order` (limit at or near the ask, small size, one leg).

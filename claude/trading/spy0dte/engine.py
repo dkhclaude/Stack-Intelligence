@@ -107,7 +107,8 @@ def size(p: dict, cfg: dict = CFG) -> dict:
 
     p keys: factors (dict), entry_premium, delta, entry_underlying, stop_underlying,
     account_value, realized_pnl (today, net), consecutive_losses, side ('call'|'put').
-    """
+    Optional (another position already open): open_positions (count), open_risk (its stop risk, $),
+    open_premium (its premium, $)."""
     sc = score(p["factors"], cfg)
     eff = effective_tier(sc, p.get("consecutive_losses", 0), cfg)
     out = {**sc, "tier": eff["tier"], "max_risk": eff["max_risk"], "streak_capped": eff["capped"]}
@@ -123,9 +124,13 @@ def size(p: dict, cfg: dict = CFG) -> dict:
     if (side == "call" and su >= eu) or (side == "put" and su <= eu):
         return skip("structural stop is on the wrong side of entry")
 
+    if p.get("open_positions", 0) >= cfg.get("max_open_positions", 1):
+        return skip("max open positions reached")
+
     realized = p.get("realized_pnl", 0.0)
     limit = daily_loss_limit(realized, cfg)
-    room = limit + realized  # dollars that can still be lost today
+    # dollars that can still be lost today, net of the stop risk already open on other positions
+    room = limit + realized - p.get("open_risk", 0.0)
     out["daily_loss_limit"] = round(limit, 2)
     out["daily_room"] = round(room, 2)
     if room <= 0:
@@ -140,7 +145,7 @@ def size(p: dict, cfg: dict = CFG) -> dict:
 
     budget = min(eff["max_risk"], room)
     n = math.floor(budget / risk_per + 1e-9)
-    acct_cap = cfg["max_account_fraction_per_trade"] * p["account_value"]
+    acct_cap = cfg["max_account_fraction_per_trade"] * p["account_value"] - p.get("open_premium", 0.0)
     n_acct = math.floor(acct_cap / (prem * 100) + 1e-9)
     n = min(n, n_acct)
     out["account_cap"] = round(acct_cap, 2)
