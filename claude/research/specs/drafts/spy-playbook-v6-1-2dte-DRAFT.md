@@ -1,7 +1,7 @@
 ---
 playbook: SPY 0DTE Momentum Playbook
 version: 6 (DRAFT)
-status: proposed - NOT ACTIVE. Live trading stays on v5 until Kevin approves.
+status: Phase A ACTIVE as playbook v6 (2026-11-16). Phase B NOT active; needs the go-live test and Kevin's approval.
 proposed: 2026-11-13
 owner: Kevin
 ---

@@ -1,7 +1,10 @@
 {
-  "playbook_version": 5,
+  "playbook_version": 6,
   "underlyings": ["SPY", "QQQ"],
   "max_open_positions": 2,
+  "live_expiries_dte": [0],
+  "shadow": {"dte": 1, "phase": "A", "go_live_min_pairs": 20, "go_live_min_fit_rate": 0.70},
+  "overnight_risk_budget": 0,
   "tiers": {
     "3": {"name": "T1", "max_risk": 10},
     "4": {"name": "T2", "max_risk": 15},

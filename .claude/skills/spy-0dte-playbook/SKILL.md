@@ -22,6 +22,16 @@ spec and config disagree, follow the spec and flag the mismatch to Kevin.
 - **Underlyings: SPY and QQQ 0DTE** (v5). No SPX, no leveraged/inverse ETFs. Up to 2 open positions,
   one per underlying; pass `open_positions`, `open_risk` and `open_premium` to `engine.py size` when
   another position is open.
+- **Live expiries: 0DTE only. No overnight holds** (overnight risk budget $0, v6).
+- **v6 Phase A shadow log:** after every live 0DTE fill, once its stop and NTFY are done, record a
+  paper **1DTE twin**.
+  - Contract: next-session expiry, the strike whose live quote delta is closest to the live
+    contract's; entry at its ask.
+  - Log `shadow_entry`. **Never order the twin.**
+  - After the live exit, pull the twin's 1-minute bars, run `claude/trading/spy0dte/shadow.py`, and
+    log `shadow_result`.
+  - Next morning, log `shadow_overnight` with the twin's open price.
+  - Live work always comes first. Details: spec Section 11.
 - **Long single-leg calls and puts only.** `place_option_order` with one leg, `side: buy` to open,
   `side: sell` to close. No spreads, no shorts, no equities.
 - **One trader.** Never spawn agents that place orders. Do all order work in this session.
