@@ -119,6 +119,11 @@ class Exits(unittest.TestCase):
 
 
 class Notify(unittest.TestCase):
+    def test_alert_message(self):
+        title, body = n.format_message("alert", {"topic": "usage", "text": "7-day usage 85%"})
+        self.assertEqual(title, "ALERT usage")
+        self.assertIn("85%", body)
+
     def test_fill_requires_score(self):
         with self.assertRaises(ValueError):
             n.format_message("fill", {"symbol": "SPY"})

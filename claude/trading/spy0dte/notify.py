@@ -3,12 +3,14 @@
     python3 claude/trading/spy0dte/notify.py fill  '{"symbol":"SPY 11/09 600C", ...}'
     python3 claude/trading/spy0dte/notify.py exit  '{...}'
     python3 claude/trading/spy0dte/notify.py stop  '{...}'
+    python3 claude/trading/spy0dte/notify.py alert '{"topic":"usage","text":"..."}'
 
 Env:
     NTFY_TOPIC   required to send (e.g. kevin-spy-0dte). Without it the message is only journaled.
     NTFY_SERVER  optional, default https://ntfy.sh
 
-Only fills, exits and stop moves are sent. Everything else stays silent.
+Only fills, exits, stop moves and operational alerts (e.g. Claude usage near its limit) are sent.
+Everything else stays silent.
 Fill messages must carry score, factors and tier.
 """
 from __future__ import annotations
@@ -26,7 +28,7 @@ from zoneinfo import ZoneInfo
 ROOT = Path(__file__).resolve().parents[3]
 JOURNAL_DIR = ROOT / "claude" / "research" / "journal" / "spy-0dte"
 PT = ZoneInfo("America/Los_Angeles")
-KINDS = {"fill", "exit", "stop"}
+KINDS = {"fill", "exit", "stop", "alert"}
 
 
 def format_message(kind: str, d: dict) -> tuple[str, str]:
@@ -42,6 +44,10 @@ def format_message(kind: str, d: dict) -> tuple[str, str]:
         title = f"EXIT {d.get('symbol', '')}"
         body = (f"{d.get('qty', '?')}x @ {d.get('price', '?')} | P&L ${d.get('pnl', '?')}"
                 f" | reason: {d.get('reason', '?')} | day P&L ${d.get('day_pnl', '?')}")
+    elif kind == "alert":
+        # Operational warnings only (e.g. Claude usage near its weekly limit). Not a trade event.
+        title = f"ALERT {d.get('topic', 'ops')}"
+        body = str(d.get("text", "?"))
     else:
         title = f"STOP {d.get('symbol', '')}"
         body = (f"{d.get('old_stop', '?')} -> {d.get('new_stop', '?')} | {d.get('rule', '')}"
