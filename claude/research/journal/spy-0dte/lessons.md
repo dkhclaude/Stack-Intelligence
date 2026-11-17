@@ -98,3 +98,52 @@ Robinhood cross-check: no option orders and no positions on 759470560; account $
 **Lesson (operational):** each check ran inside one very long conversation and re-read about 490k tokens of history, roughly $0.47 at list price per check. That burned the weekly allowance. The fixes are a fresh session per trading day (about 20x less usage per check), a morning usage check with an NTFY warning, and extra-usage credits as a backstop. Proposed to Kevin; none of this is a playbook rule.
 
 **Rule change:** none (no trades). No dollar amounts, limits or tiers changed.
+
+## 2026-11-17 — 2 trades, +$164 — playbook v6 (Phase A day 2)
+
+Robinhood cross-check: 4 filled option orders on 759470560 match the journal (729P buy 0.94 / stop-sell 2.60; 739C buy 0.66 / sell 0.64). Account $896.45 → $1,060.27 cash, flat, no open orders.
+
+**Trade 1 — SPY 11/17 729P x1, 0.94 → 2.60, +$166. Score 6/6, T4 ($35). Grade: A (process A, outcome A).**
+Put on the breakdown with all six factors, sized by the engine to 1 contract, structural stop above the lower high (option 0.71). The ladder was followed with cancel → confirm → replace on each move (1.61 → 1.94 → 2.61, peak 3.49), and the 75% trail took the exit at 2.60. An earlier score-6 attempt (730P, 07:31) went unfilled and was cancelled and confirmed without chasing. The process was right.
+*Lesson:* the ladder did its job on a fast leg. No change.
+
+**Trade 2 — SPY 11/17 739C x1, 0.66 → 0.64, −$2. Score 4/6 (trend, structure, key_level, breadth; volume and time missed), T2 ($15). Grade: B (process B, outcome neutral).**
+- *Right:*
+  - It was a continuation entry after the 09:05 news impulse: the flag held above 733.37, the pullback low was 733.74, and the close at 734.41 was above the flag.
+  - The score was honest. Volume was 1.25x, not counted.
+  - The engine gave exactly $15 risk for 1 contract. The stop went in 9 s after the fill.
+  - When SPY closed below the 733.69 structural level (733.61, then 733.41), I exited on the underlying close. The option stop had not fired: delta drifted 0.21 → 0.19 and the option held 0.63 against a 0.51 stop. That turned a likely −$15 into −$2.
+- *Wrong:*
+  - The fill NTFY was journaled but **not sent** on the first try, because NTFY_TOPIC was unset in the environment. It was re-sent with the topic about 1 minute later.
+  - The exit limit was $0.01 through the bid, not the ≥ $0.05 that Section 8 requires. It still filled at 0.64.
+  - Entering near the top of a range that had just rejected was a marginal location.
+- *Lesson:* the delta-converted option stop is only an estimate of the structural level. When the underlying closes through the level, the setup is broken whatever the option shows. → **Rule change v7.**
+
+**Skips.** Each skip followed the rules:
+- 07:10, 07:16–18, 08:22, 08:30–32
+- 08:37: size 0
+- 08:51: whipsaw
+- 08:55: no volume, size 0
+- 09:03: call rejected at 731.15
+- 09:08: impulse with no flag
+- 09:19: chase $0.43 > $0.40
+- 09:39–10:14: no-volume probes of 731.2–731.7
+
+**Operational misses:**
+- Three valid triggers (08:45, 08:58, 09:17) fired between 2–3 min checks and were missed or became chases.
+- Usage reached 87% of the 5-hour window by 10:15. Checking every minute is not affordable in this session.
+
+**Phase A shadow:**
+
+| Pair | Live 0DTE | 1DTE twin | Twin result | Fit tier? |
+|---|---|---|---|---|
+| #1 | +$166 | 725P 11/18 | +$149 | Yes |
+| #2 | −$2 | 743C 11/18 | −$1 nominal | No ($16 > $15), 0 contracts |
+
+Running tally: 2 paired signals, twin fit 1/2, live +$164 vs twin (fit only) +$149.
+
+**Follow-ups (not rule changes):**
+- Give `notify.py` a default topic so a missing env var cannot silence a fill alert.
+- Kevin's pending decision on extra usage credits vs. permission rules for fresh sessions.
+
+**Rule change:** v7. Section 7 adds a structural-close exit: exit when a completed 1-minute underlying close is beyond the structural stop, even if the option stop hasn't triggered. No dollar amounts, limits or tiers changed.

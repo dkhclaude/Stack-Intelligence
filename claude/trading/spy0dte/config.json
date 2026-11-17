@@ -1,5 +1,6 @@
 {
-  "playbook_version": 6,
+  "playbook_version": 7,
+  "structural_close_exit": true,
   "underlyings": ["SPY", "QQQ"],
   "max_open_positions": 2,
   "live_expiries_dte": [0],
