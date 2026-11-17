@@ -83,3 +83,18 @@ Robinhood cross-check: no option orders on 759470560 today; account $896.45 cash
 **Evidence to keep collecting (no change today):** whether late check-ins should get a "trigger bar must be ≤ 1 bar old" rule spelled out in the spec (it was applied by judgment at 09:10 and 10:05).
 
 **Rule change:** none (no trades — per the review spec, no rule change). No dollar amounts, limits or tiers changed.
+
+## 2026-11-16 — no trades, $0 — playbook v6 (Phase A day 1)
+
+Robinhood cross-check: no option orders and no positions on 759470560; account $896.45 cash, flat.
+
+**No trades and no shadow pairs. This was an infrastructure failure, not a rules decision.**
+- The morning read (gap down) and four checks ran normally from 06:46 to 07:01 PT, with nothing triggering in the opening-range chop.
+- The session's worker then restarted, and the `send_later` check chain did not survive it. No checks ran for the rest of the session.
+- SPY broke its opening-range low within minutes and trended down all day: 746.6 → 743.3 by 07:30, a low of 738.07 and a close near 740. QQQ fell 666.6 → 660.5.
+- The put setup in the 07:01 check prompt very likely fired, so this was a missed opportunity.
+- Nothing was left unprotected, because no position was open.
+
+**Lesson (operational):** a chain of one-shot `send_later` checks is a single point of failure. A watchdog scheduled task during market hours would restart the chain when it has died. Proposed to Kevin; it is not a playbook rule.
+
+**Rule change:** none (no trades). No dollar amounts, limits or tiers changed.
