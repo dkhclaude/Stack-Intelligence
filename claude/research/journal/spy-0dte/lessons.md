@@ -88,13 +88,13 @@ Robinhood cross-check: no option orders on 759470560 today; account $896.45 cash
 
 Robinhood cross-check: no option orders and no positions on 759470560; account $896.45 cash, flat.
 
-**No trades and no shadow pairs. This was an infrastructure failure, not a rules decision.**
+**No trades and no shadow pairs. The cause was the weekly Claude usage limit, not the rules.**
 - The morning read (gap down) and four checks ran normally from 06:46 to 07:01 PT, with nothing triggering in the opening-range chop.
-- The session's worker then restarted, and the `send_later` check chain did not survive it. No checks ran for the rest of the session.
+- At 07:02 PT the account hit its **7-day Claude usage limit** (API 429 `usage_limit_reached`; extra usage disabled: `out_of_credits`). The 07:01 check died before it could re-arm, and nothing ran until the limit reset at 04:00 UTC on 11-17.
 - SPY broke its opening-range low within minutes and trended down all day: 746.6 → 743.3 by 07:30, a low of 738.07 and a close near 740. QQQ fell 666.6 → 660.5.
 - The put setup in the 07:01 check prompt very likely fired, so this was a missed opportunity.
 - Nothing was left unprotected, because no position was open.
 
-**Lesson (operational):** a chain of one-shot `send_later` checks is a single point of failure. A watchdog scheduled task during market hours would restart the chain when it has died. Proposed to Kevin; it is not a playbook rule.
+**Lesson (operational):** each check ran inside one very long conversation and re-read about 490k tokens of history, roughly $0.47 at list price per check. That burned the weekly allowance. The fixes are a fresh session per trading day (about 20x less usage per check), a morning usage check with an NTFY warning, and extra-usage credits as a backstop. Proposed to Kevin; none of this is a playbook rule.
 
 **Rule change:** none (no trades). No dollar amounts, limits or tiers changed.
