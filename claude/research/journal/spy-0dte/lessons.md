@@ -147,3 +147,27 @@ Running tally: 2 paired signals, twin fit 1/2, live +$164 vs twin (fit only) +$1
 - Kevin's pending decision on extra usage credits vs. permission rules for fresh sessions.
 
 **Rule change:** v7. Section 7 adds a structural-close exit: exit when a completed 1-minute underlying close is beyond the structural stop, even if the option stop hasn't triggered. No dollar amounts, limits or tiers changed.
+
+## 2026-11-18 — no trades, $0 — playbook v7 (first fresh-session trader day)
+
+Robinhood cross-check: 1 option order on 759470560: an SPY 11/18 723P limit at 0.73 (08:18 PT), cancelled with nothing filled. No fills, no positions. The journal matches.
+
+**No trades.** Nothing to grade on process vs outcome. The one entry attempt went by the rules:
+- 08:16 SPY put on a new low with QQQ and SMH confirming: score 5, T3.
+- The limit order at the ask didn't fill; the ask ran to 0.83 within about 6 s.
+- The order was cancelled and the cancel confirmed. SPY was more than $0.40 past the trigger, so no chase.
+
+**Skips (13).** All by the rules, and most were size 0. A delta-0.17-0.20 contract with a structural stop 1.25-1.9 points away risks $25-37 per contract, which is over the T1 ($10) and T2 ($15) caps and sometimes the T3 ($25) cap. Other skips were failed breaks that closed back inside within a minute (07:33, 07:49, 08:21) or had no breadth or volume. SPY drifted lower all morning (733.4 → about 727) in small legs without clean bases.
+
+**Operational:**
+- **Fresh-session trader worked:**
+  - started 06:21, checked every minute 06:45-09:30, pushed its journal, and wrote the end-of-day summary at 10:15;
+  - the launcher's 06:32 and 08:00 checks passed.
+- **Usage:** the 5-hour window still hit 100% at about 09:52 PT, and the rest of the session ran on extra usage. Weekly usage is now 47%. The trader's per-check cost grew as its context grew (about $0.16 → $0.20 per check).
+- **1DTE shadow, overnight:** both 11-17 twins gapped hard against their entries at today's open: 725P 2.05 → 0.67 and 743C 1.41 → 0.60. That confirms the overnight risk budget of $0.
+
+**Evidence to keep collecting (no change today):**
+- How often a structural stop × delta 0.20 is too big for T1/T2: 6 of 13 skips today.
+- If it keeps happening, the candidate change is to prefer delta 0.12-0.15 when the stop is wide. That is a contract-choice change, not a dollar-amount change.
+
+**Rule change:** none (no trades, per the review spec). No dollar amounts, limits or tiers changed.
