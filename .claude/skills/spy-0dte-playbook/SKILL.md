@@ -88,7 +88,8 @@ as backup. Compute VWAP from the session's bars if no indicator is available.
 
 ## 5. Managing the position
 
-- Poll every **1 minute** near a breakout or near a stop/target, every **2 minutes** otherwise.
+- Poll every **1 minute from 06:45 to 09:30 PT** no matter what (Kevin's call, 11-17). After 09:30: every
+  **1 minute** near a breakout or with an open position, every **2 minutes** otherwise.
   Between turns use `send_later` (delay 1-2 min) with a message like
   "SPY 0DTE: manage <symbol>, entry X, stop Y, peak Z, contracts N" so the next turn has the state.
 - Track the **peak mark** = max(current mark, highest 1-minute option close since the last check via

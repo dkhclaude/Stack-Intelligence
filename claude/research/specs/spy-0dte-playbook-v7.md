@@ -138,8 +138,12 @@ with this doc when a version bump changes a number.
 
 ## 9. Monitoring
 
-- Check every 1 minute near a breakout or with an open position near a stop/target, every 2 minutes otherwise.
+- **Check every 1 minute from 06:45 to 09:30 PT, whatever the tape** (Kevin, 2026-11-17: he is buying more
+  Claude usage so signals are not missed between checks). From 09:30 to 10:15, check every 1 minute near a
+  breakout or with an open position, every 2 minutes otherwise. With an open position, always every 1 minute.
   Use `send_later` to wake the session between turns.
+  *2026-11-17: valid triggers at 08:45, 08:58 and 09:17 fired between 2-3 minute checks and were missed or
+  became chases (the 09:17 call ran $0.43 past its trigger close before the next check).*
 - Message Kevin on every fill, exit or stop move via NTFY. Stay silent otherwise.
 - With two open positions, manage both on every check (each has its own stop order, peak mark and ladder) and
   carry both in the `send_later` state.
@@ -201,6 +205,8 @@ separate cap, never larger than T1 ($10) of total premium at first.
   2026-11-17 739C - SPY closed 733.61 and 733.41 below the 733.69 structural stop while the option held 0.63 vs its
   0.51 stop (delta drift 0.21 -> 0.19); the exit on the underlying close was -$2 vs up to -$15. Codifies what was done
   by judgment. No dollar amounts, limits or tiers changed. `config.json`: `playbook_version` 7, `structural_close_exit` true.
+  - Section 9 (Kevin, 2026-11-17): 1-minute checks every minute 06:45-09:30 PT; Kevin is adding Claude usage to
+    pay for it. Evidence: three valid triggers missed between 2-3 minute checks on 11-17.
 
 - **v6 (2026-11-16, Kevin approved Phase A 2026-11-15):**
   - Added Section 11, a paper shadow log of a delta-matched 1DTE twin for every live 0DTE fill:
