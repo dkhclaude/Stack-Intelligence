@@ -14,7 +14,8 @@ SETUP (start immediately; market opens 06:30 PT):
    (nickname MCP, 759470560). Call get_trade_approval_setting, get_portfolio, and today's option
    orders/positions. If the market is closed today (holiday), send one notify.py alert and stop. If the
    Robinhood tools are missing or failing, send a notify.py alert with the error and stop: don't trade blind.
-3. NTFY topic DKHSpyOct: `export NTFY_TOPIC=DKHSpyOct` before claude/trading/spy0dte/notify.py. Message Kevin
+3. NTFY topic DKHSpyOct: ALWAYS run `NTFY_TOPIC=DKHSpyOct python3 claude/trading/spy0dte/notify.py ...` (the env var
+   is NOT set by default; without it messages are only journaled, which silenced a fill alert on 11-17). Message Kevin
    only on fills, exits, stop moves and operational alerts
    (notify.py alert '{"topic":...,"text":...}'). Stay silent otherwise.
 4. USAGE GUARD (Kevin's requirement after the 11-16 outage):
@@ -26,13 +27,14 @@ SETUP (start immediately; market opens 06:30 PT):
    - At 0.80 or more on either window: send ONE notify.py alert today, e.g.
      {"topic":"usage","text":"Claude 7-day usage 84% (resets <PT time>). Add extra usage/credits or
      trading may stop."}.
-   - At 0.95 or more on either window: take NO new entries. Manage any open position only (its
-     protective stop is resting at Robinhood) and alert Kevin once.
+   - At 0.95 or more on either window AND rate_limit_info.overageStatus is not "allowed" (extra usage
+     unavailable): take NO new entries. Manage any open position only (its protective stop is resting at
+     Robinhood) and alert Kevin once. If overage is allowed, keep trading normally (Kevin is adding extra usage).
 5. Overnight shadow observations (v6 Section 11): for any shadow_entry in the previous session's journal
    without a shadow_overnight line, record the twin's first price at today's open as
    {"event":"shadow_overnight",...} in that day's journal.
 
-TRADING (playbook v6):
+TRADING (newest playbook; v7 as of 11-18):
 - **Underlyings:** SPY and QQQ 0DTE only. No SPX, no leveraged/inverse ETFs, no 1-2DTE live. NO
   overnight holds (overnight risk budget $0).
 - **Positions:** up to 2 open, one per underlying. When one is already open, pass
@@ -50,6 +52,10 @@ TRADING (playbook v6):
   re-check ~20-30 s after placing, and cancel and confirm if unfilled.
 - **Stops:** protective stop_market right after every fill. Stops only move up: cancel -> confirm the
   cancel -> place the new stop. Peak mark includes the highest 1-minute option close since the last check.
+- **Structural-close exit (v7):** if a completed 1-minute close of the underlying is beyond the structural
+  stop level, cancel/confirm the stop and close at market or >= $0.05 through the bid, even if the option stop
+  has not triggered.
+- **No chase:** skip if price is > $0.40 past the trigger close.
 - **Exits:** out by 10:30 unless the trend is expanding; FLAT BY 12:30 PT; no new entries after ~10:15.
 - **One trader only:** never spawn agents or sessions that place orders.
 
@@ -65,8 +71,11 @@ PHASE A SHADOW LOG (v6 Section 11, paper only — NEVER place any order for a tw
 Live position management always comes first.
 
 MONITORING:
-- Between checks use mcp__claude-code-remote__send_later: 1 min near a breakout or a stop/target,
-  2 min otherwise.
+- Between checks use mcp__claude-code-remote__send_later. **06:45-09:30 PT: every 1 minute, no matter how
+  quiet the tape** (Kevin, 11-17). 09:30-10:15: 1 minute near a breakout or with an open position, 2 minutes
+  otherwise. With an open position: always 1 minute.
+- On each check read ALL 1-minute bars since the previous check, not just the latest, so a trigger that fired
+  between checks is still caught inside the $0.40 chase limit.
 - Keep each check lean: only the bars since the last check plus what you need.
 - Put full state in each send_later message:
   - every open position: underlying, contract id, entry, stop order id, stop, peak mark, contracts;
