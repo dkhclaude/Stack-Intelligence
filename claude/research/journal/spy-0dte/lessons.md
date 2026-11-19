@@ -171,3 +171,46 @@ Robinhood cross-check: 1 option order on 759470560: an SPY 11/18 723P limit at 0
 - If it keeps happening, the candidate change is to prefer delta 0.12-0.15 when the stop is wide. That is a contract-choice change, not a dollar-amount change.
 
 **Rule change:** none (no trades, per the review spec). No dollar amounts, limits or tiers changed.
+
+## 2026-11-19 — 1 trade, +$105 — playbook v7
+
+Robinhood cross-check: 2 filled option orders on 759470560 match the journal (SPY 11/19 725P buy 1.12 at 07:28; trailing stop_market sell 2.17 at 07:42). Robinhood realized P&L for the day: +$105.
+
+**Trade 1: SPY 11/19 725P x1, 1.12 → 2.17, +$105. Score 5/6 (trend, structure, key_level, breadth, time; volume missed), T3 ($25). Grade: A (process A, outcome A).**
+
+What went right:
+- Clean bear-flag break: the 07:25 close at 730.53 was below the 731.245 base low, with QQQ and SMH confirming.
+- Structural stop above the 732.18 lower high (SPY 732.23), converted with delta 0.227: $23 of risk, fits T3.
+- Engine size was 1 contract. The stop and the fill NTFY went out right after the fill.
+- The ladder was followed exactly, with cancel → confirm → replace and an NTFY each time:
+  - 0.89 → 1.40 (+50% lock)
+  - 1.40 → 1.57 (+80% lock)
+  - 1.57 → 2.18 (75% trail of the 2.91 peak)
+- It filled at 2.17, 1 cent under the stop.
+
+What went wrong: nothing in the process.
+
+*Lesson:* the 75% trail locked in +94% on a fast leg. The option then gave back further as SPY bounced 07:42-07:50.
+
+**1DTE shadow (pair #3):** the SPY 11/20 721P twin fit T3 (risk $24). It peaked at only +87%, so it stayed on the +40% lock and exited at 2.74: +$78 vs live +$105.
+
+Running tally:
+- 3 pairs: live +$269 vs twin (fit only) +$227
+- the twin fit its tier in 2 of 3 pairs
+
+**Skips (11):** all by the rules.
+- **Size 0 / no base:** the 08:51-08:53 impulse flushes, where the nearest structural stop was 2.9-3.4 points away.
+- **No chase:** the 07:17 and 09:03 breaks were more than $0.40 past their triggers.
+- **Failed breaks:** 07:14 and 07:51.
+
+SPY trended down hard after the trade (731 → 719), mostly in single-bar flushes with no base. The playbook stands aside in that kind of move by design.
+
+**Operational:**
+- **Late scheduler wakes:** two of the 1-minute checks fired late, by about 3.5 min (07:14) and 1.7 min (07:17). The 07:14-07:15 SPY + QQQ breakdown on 154k/170k volume was missed as a chase because of it.
+- **Usage:** the 5-hour window was at 80% by 08:59 and the weekly at 60% (one alert sent). Extra usage is allowed, so trading continued.
+
+**Evidence to keep collecting (no change today):**
+1. **Wide structural stops.** Two days of size-0 skips where the stop × delta 0.20 was more than the cap: 6 of 13 on 11-18, and 4 of 11 today. The candidate change is a lower-delta contract (0.12-0.15) when the structural stop is more than 1.2 points. It is not adopted yet: there's no replay of how those lower-delta contracts would have done, and impulse flushes with no base are exactly what the structure factor is meant to filter out.
+2. **Scheduler lateness.** It cost one signal today. That's infrastructure, not a playbook rule.
+
+**Rule change:** none. Today's single trade followed the rules exactly, and the open questions need replay evidence first. No dollar amounts, limits or tiers changed.
