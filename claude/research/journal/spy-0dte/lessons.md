@@ -214,3 +214,56 @@ SPY trended down hard after the trade (731 → 719), mostly in single-bar flushe
 2. **Scheduler lateness.** It cost one signal today. That's infrastructure, not a playbook rule.
 
 **Rule change:** none. Today's single trade followed the rules exactly, and the open questions need replay evidence first. No dollar amounts, limits or tiers changed.
+
+## 2026-11-20 — 3 trades, +$60 — playbook v7
+
+Robinhood cross-check: 7 filled option orders on 759470560 match the journal:
+- 724C x1: 1.07 → stop 0.89
+- 695P x3: 0.61 → 1@1.00, 2@0.91
+- 690P x1: 0.55 → stop 0.34
+
+Robinhood realized P&L for the day: +$60 (4 closing fills). Flat at close.
+
+**Trade 1: SPY 11/20 724C x1, 1.07 → 0.89, −$18. Score 5 (volume missed), T3. Grade: B+ (process B+, outcome loss).**
+- Right: a reclaim of the prior-day low (715.65) and the high of day on a gap-down open, with QQQ and SMH confirming. Delta 0.208 was in the spec. Stop below the 715.64 pullback low (SPY 715.59), $18 of risk. The stop was placed immediately.
+- Wrong: the stop was only 0.84 points under entry, against a 2-point 1-minute range on a gap day. SPY tagged 718.29, then reversed through the stop within a minute. It was a legitimate structural level, but a thin one. The option's peak was +21%, under the +30% breakeven step.
+- *Lesson:* on gap days with wide 1-minute bars, a sub-1-point structural stop is noise-level. This is evidence for the existing rule against chasing thin bases, not for a new rule.
+
+**Trade 2: SPY 11/20 695P x3, 0.61 → 1@1.00 + 2@0.91, +$99. Score 6, tier T4 capped at the $22 of daily room left. Grade: B (process B, outcome A).**
+- Right:
+  - A flag break below 705, with all six factors.
+  - Size capped by the remaining daily loss room ($40 limit − $18 = $22), exactly as Section 4 requires.
+  - Breakeven at +30%, the +25% lock at +50%.
+  - Scaled out half at +50% per Section 8, then took the early profit on a 25%-of-peak give-back within 3 minutes.
+- **Rule deviation:** the contract was delta 0.139. Section 6 specifies delta ~0.18-0.25, and the trader's own 06:56 skip note said so ("would need d~0.10, outside the 0.18-0.25 spec"). The lower delta is what let 3 contracts fit the $22 room with a 0.46-point stop. It worked this time, but it was not a playbook choice.
+
+**Trade 3: SPY 11/20 690P x1, 0.55 → 0.34, −$21. Score 5 (time missed), T3. Grade: C+ (process C+, outcome loss).**
+- Right: the 700-round / low-of-day break had QQQ and SMH confirming. Structural stop at 701.19. The stop order was placed immediately.
+- Wrong:
+  - **Delta 0.13 again, outside the 0.18-0.25 spec.**
+  - At low delta the option bled from theta while SPY chopped 699-701 for 20 minutes. The option stop (0.34) filled even though the structural level (701.19) was never hit. A low-delta 0DTE contract loses value from time alone, so a delta-converted stop acts like a time stop.
+  - It came 9 minutes after the 09:30 cadence change, at a level (700) that had already been broken and reclaimed twice.
+- *Lesson:* the two low-delta trades netted +$78 (+$99 −$21), but the 690P shows the cost. A low-delta contract's stop gets hit by theta, not by price structure. This needs Kevin's decision, not a quiet drift in practice.
+
+**1DTE shadow (pairs #4-6):**
+
+| Pair | Live | 1DTE twin | Twin fit? |
+|---|---|---|---|
+| 724C | −$18 | 729C −$28 (gapped through stop in the simulation) | yes |
+| 695P | +$99 | 682P −$12 (wick stop-out: 0.46-point stop at delta 0.13 was inside 1-minute noise) | yes, 2 contracts |
+| 690P | −$21 | 677P −$21 | yes |
+
+Running tally:
+- 6 pairs: live +$329 vs twin (fit only) +$166
+- the twin fit its tier in 5 of 6 pairs
+- 1DTE did worse than 0DTE on 3 of the 5 comparable pairs this week
+
+**Skips (25) and operational:**
+- Most skips were size 0: wide structural stops on a 40-point trend-down day (SPY 716 → 699), mostly made of single-bar flushes.
+- The 07:44 SPY setup did fit the risk limit (stop 708.99, about $15). It was missed because send_later rounded a 1-minute re-arm to about 2 minutes (armed 07:44:43, fired 07:46:57).
+- Several more checks fired 1.7-3.7 minutes late.
+- Usage: the 5-hour window hit its limit and ran on extra usage; weekly usage was at 67% by the open. The trader session's connection restarted 4 times, and it recovered each time.
+
+**Rule change: none.** Evidence for a lower-delta option has now built up over 3 days (size-0 skips) plus today's 2 off-spec trades (+$99, −$21). But the 690P theta bleed is a real counter-case, and the contract-choice range is a sizing/risk change Kevin should approve, not the review. **Until Kevin decides, the 0.18-0.25 delta range in Section 6 stands, and off-spec entries are graded as deviations.**
+
+Proposed for Kevin: allow delta 0.12-0.18 only when the structural stop does not fit at 0.18-0.25, with premium ≥ $0.40 and a time stop (exit if not +30% within 10 minutes).
