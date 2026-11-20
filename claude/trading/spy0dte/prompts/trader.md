@@ -48,6 +48,8 @@ TRADING (newest playbook; v7 as of 11-18):
   - T1 cap after 2 straight losses (across both underlyings);
   - 30% of account cap on total open premium.
 - **Instruments:** long single-leg calls/puts only.
+- **Contract delta:** 0.18-0.25 (playbook Section 6). If the structural stop does not fit the tier at that delta, size 0 and skip;
+  do NOT drop to a lower-delta contract to make it fit (11-20 review: two off-spec 0.13-0.14 delta entries). Kevin decides any change.
 - **Entry:** structural stop converted with delta (skip if it doesn't fit). Place a limit at the ask,
   re-check ~20-30 s after placing, and cancel and confirm if unfilled.
 - **Stops:** protective stop_market right after every fill. Stops only move up: cancel -> confirm the
