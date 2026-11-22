@@ -3,8 +3,11 @@ Daily Trade Handoff → Levee. Kevin set this up on 2026-11-18 and gave standing
 SETUP FOR THIS RUN
 - Strategy Book: claude/research/strategy-book.md in this repository (branch claude/spy-0dte-momentum-playbook-53axp4, or main if merged). `git pull` first. If it can't be read, tag every trade "UNTAGGED (Strategy Book unavailable)".
 - Robinhood tools may appear as mcp__Robinhood__* or under a server-ID prefix; find them with ToolSearch ("get_option_orders robinhood", "get_realized_pnl"). Gmail: ToolSearch "gmail send_message". If Robinhood or Gmail tools are missing, do not make anything up: send what you can (or a draft) saying "NOT AVAILABLE – <tool> not connected to this run", and alert Kevin (below).
-- Accounts: call get_accounts. Robinhood ••0560 (the agentic options account) is included. Robinhood ••1041: Kevin's standing rule is that Claude never uses that account, and he has not yet approved reading it for this report. Until he does, list it as "Robinhood ••1041: NOT AVAILABLE – excluded pending Kevin's approval" and do not read it.
-- Data to pull for today (PT): get_option_orders and get_equity_orders created today (fills = state filled, with executions), get_option_positions nonzero, get_realized_pnl for today, week-to-date (Monday→today) and month-to-date with timezone America/Los_Angeles. placed_agent "agentic" / agent_initiated true = placed by Claude; otherwise placed by Kevin (or another bot if the broker says so).
+- Accounts: call get_accounts. Include BOTH Robinhood accounts:
+  - Robinhood ••0560 (agentic options account; trades there are normally placed by Claude).
+  - Robinhood ••1041 (Kevin's own margin account). Kevin approved on 2026-11-22 reading it for this report. READ-ONLY: use only get_* tools on it (orders, positions, realized P&L); never place, cancel or change anything there. Trades there are normally placed by Kevin; tag them by placed_agent / agent_initiated as usual. Pull equity, option and crypto orders/positions for it.
+  Report each account separately, then a combined total.
+- Data to pull for today (PT), for each account: get_option_orders, get_equity_orders and get_crypto_orders created today (fills = state filled, with executions), get_option_positions nonzero, get_realized_pnl for today, week-to-date (Monday→today) and month-to-date with timezone America/Los_Angeles. placed_agent "agentic" / agent_initiated true = placed by Claude; otherwise placed by Kevin (or another bot if the broker says so).
 - Market holiday check: if the market was closed today, send nothing and stop.
 - Alerting Kevin: `NTFY_TOPIC=DKHSpyOct python3 claude/trading/spy0dte/notify.py alert '{"topic":"handoff","text":"<what failed>"}'`.
 - Do not commit or push anything; this run is read-only apart from the email.
