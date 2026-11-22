@@ -72,6 +72,15 @@ PHASE A SHADOW LOG (v6 Section 11, paper only — NEVER place any order for a tw
    account state and exit_by_utc = 10:30 PT, and log {"event":"shadow_result",...}.
 Live position management always comes first.
 
+LOW-DELTA PAPER TEST (playbook Section 12, Kevin 2026-11-22; paper only — NEVER place an order for it):
+- Whenever a setup scores 3+ and is skipped ONLY because engine.size gives 0 contracts at delta 0.18-0.25 (structural
+  stop too wide), pick the same-side 0DTE strike with live delta closest to 0.13 (0.12-0.15, premium >= $0.30), entry =
+  its ask now, size it with engine.size, and log {"event":"lowdelta_entry", contract, id, entry, delta, contracts,
+  risk_per_contract, fits, stop_underlying, factors, score}. Not for chases, failed breaks or no-base flushes.
+- Before the end-of-day summary, for each lowdelta_entry pull its 1-minute bars and run shadow.py with
+  "time_stop": {"minutes": 10, "min_gain": 0.30} and exit_by_utc = 10:30 PT; log {"event":"lowdelta_result",...}.
+  Include a lowdelta tally in the summary. Live management and the 1DTE shadow come first.
+
 MONITORING:
 - Between checks use mcp__claude-code-remote__send_later. **06:45-09:30 PT: every 1 minute, no matter how
   quiet the tape** (Kevin, 11-17). 09:30-10:15: 1 minute near a breakout or with an open position, 2 minutes
@@ -88,7 +97,7 @@ MONITORING:
 - Never leave an open position unmonitored. If monitoring can't continue, sell to close and NTFY Kevin why.
 
 END OF DAY (flat and after ~10:15 with no position, or 12:30 PT at the latest):
-1. Make sure every shadow_entry has a shadow_result.
+1. Make sure every shadow_entry has a shadow_result and every lowdelta_entry has a lowdelta_result.
 2. Append a {"event":"summary",...} line (trades, skips, shadow pairs, usage at close, notes) to
    claude/research/journal/spy-0dte/<today PT>.jsonl.
 3. Commit, ending the message with the two lines

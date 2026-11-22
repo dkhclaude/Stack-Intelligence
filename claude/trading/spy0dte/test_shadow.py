@@ -32,6 +32,18 @@ class Shadow(unittest.TestCase):
         self.assertEqual(r["exit"]["reason"], "still open (marked)")
         self.assertEqual(r["overnight_obs"], round((0.50 - 0.92) * 100, 2))
 
+    def test_time_stop_fires_when_no_gain(self):
+        bars = [[f"t{i}", 0.95, 0.90, 0.93] for i in range(1, 12)]
+        r = shadow.run({**BASE, "time_stop": {"minutes": 10, "min_gain": 0.30}, "bars": bars})
+        self.assertEqual(r["exit"]["ts"], "t10")
+        self.assertTrue(r["exit"]["reason"].startswith("time stop"))
+        self.assertEqual(r["pnl"], round((0.93 - 0.92) * 100 * r["contracts"], 2))
+
+    def test_time_stop_skipped_after_gain(self):
+        bars = [["t1", 1.25, 0.95, 1.22]] + [[f"t{i}", 1.25, 1.18, 1.20] for i in range(2, 12)]
+        r = shadow.run({**BASE, "time_stop": {"minutes": 10, "min_gain": 0.30}, "bars": bars})
+        self.assertNotIn("time stop", r["exit"]["reason"])
+
 
 if __name__ == "__main__":
     unittest.main()

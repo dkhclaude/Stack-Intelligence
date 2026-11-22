@@ -197,7 +197,29 @@ Phase B, is in `drafts/spy-playbook-v6-1-2dte-DRAFT.md`. Evidence: `claude/resea
 Revisit after 20 shadow pairs that include overnight observations. Any budget proposed then would be a
 separate cap, never larger than T1 ($10) of total premium at first.
 
+## 12. Low-delta paper test (Kevin, 2026-11-22; paper only)
+
+Purpose: find out whether delta 0.12-0.15 contracts would make money on the setups that are skipped only because
+the structural stop does not fit the tier at delta 0.18-0.25. **Live trading stays at delta 0.18-0.25 (Section 6).
+Never place an order for a low-delta paper entry.**
+
+1. **When:** every time a setup scores 3+ and passes every rule except size (engine.size gives 0 contracts at delta
+   0.18-0.25 because the structural stop is too wide). Not for chases, failed breaks, score < 3 or no-base flushes.
+2. **Contract:** same underlying, side and 0DTE expiry; the strike whose live quote delta is closest to 0.13
+   (allowed 0.12-0.15) with premium >= $0.30. Entry = its ask at the trigger check.
+3. **Sizing:** engine.size with the same factors, tier, structural stop and account state. Record contracts, risk per
+   contract and whether it fits. If it still does not fit at 0.12, log it as "no fit".
+4. **Management:** the normal ladder and stops, plus a time stop: exit at the 1-minute close 10 minutes after entry
+   unless a close has reached +30%. Simulate with `shadow.py` (`time_stop: {"minutes": 10, "min_gain": 0.30}`,
+   `exit_by_utc` = 10:30 PT) on the contract's 1-minute bars after the live session's last position is managed.
+5. **Journal:** `{"event":"lowdelta_entry", ...}` at the check, `{"event":"lowdelta_result", ...}` by end of day. Live
+   management and the 1DTE shadow always come first.
+6. **Decision:** after about 20 paper entries, the daily review reports win rate, P&L per entry, how many fit, and
+   time-stop vs price-stop exits. Kevin decides whether to allow low delta live; the review cannot.
+
 ## Changelog
+
+- **v7 addendum (2026-11-22, Kevin):** Section 12, a paper-only low-delta (0.12-0.15) test on size-0 skips with a 10-minute / +30% time stop. `shadow.py` gains `time_stop`. No live rule, dollar amount or limit changed.
 
 - **v7 (2026-11-18):** Section 7 - structural-close exit: when a completed 1-minute close of the underlying is
   beyond the structural stop level, exit at once even if the delta-converted option stop has not triggered (the

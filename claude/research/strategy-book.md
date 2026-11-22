@@ -45,3 +45,9 @@ Last updated: 2026-11-18 (from the playbook spec; pending Kevin's confirmation o
 
 - **Status:** PAPER only (never ordered). It's a delta-matched 1DTE contract logged for every live 0DTE fill.
   It's reported in the handoff as a paper line, not as a trade.
+
+## 5. Low-delta paper test (delta 0.12-0.15)
+
+- **Status:** PAPER only (never ordered), from 2026-11-23. On setups skipped only because the stop is too wide at
+  delta 0.18-0.25, a delta ~0.13 contract is logged and simulated with the normal ladder plus a 10-minute / +30% time
+  stop. Reported in the handoff as a paper line, not as a trade. Kevin decides after ~20 entries.
