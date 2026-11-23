@@ -78,8 +78,8 @@
   "capital_scaling": {
     "enabled": true,
     "base_account": 896.45,
-    "day_account": 1224.74,
-    "set_on": "2026-11-23",
+    "day_account": 1202.56,
+    "set_on": "2026-11-23 EOD (for 2026-11-24)",
     "rounding": "floor_dollar",
     "note": "tiers and daily_loss base/max are the base values at base_account; engine multiplies by day_account/base_account. Updated at end of each trading day to the closing account value (Kevin, 2026-11-23)."
   }
