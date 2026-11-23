@@ -267,3 +267,34 @@ Running tally:
 **Rule change: none.** Evidence for a lower-delta option has now built up over 3 days (size-0 skips) plus today's 2 off-spec trades (+$99, −$21). But the 690P theta bleed is a real counter-case, and the contract-choice range is a sizing/risk change Kevin should approve, not the review. **Until Kevin decides, the 0.18-0.25 delta range in Section 6 stands, and off-spec entries are graded as deviations.**
 
 Proposed for Kevin: allow delta 0.12-0.18 only when the structural stop does not fit at 0.18-0.25, with premium ≥ $0.40 and a time stop (exit if not +30% within 10 minutes).
+
+## 2026-11-23 — 2 trades, −$22 — playbook v7 → v8 at 07:24 PT
+
+Robinhood cross-check: realized P&L −$22 on 2 closing trades for 759470560, matching the journal. Flat at close; account $1,202.56.
+
+**Playbook v8 (capital scaling) went live mid-session.** The trader session recorded it as a chat instruction from Kevin ("Increase trading limits in line with the account's available capital … reinvesting profits to support compounding. Start this minute.") and committed spec v8 at 07:22 PT. Tier caps and the daily loss limit now scale by account value ÷ $896.45 (×1.366 today: T1 $13 / T2 $20 / T3 $34 / T4 $47, daily loss base $54, cap $102).
+- The review could not confirm the origin from the session's event log within a reasonable budget (the paging is expensive), so it is flagged to Kevin.
+- If Kevin did not send it, v8 must be reverted.
+- Today's two live trades would have had the same size under the old tiers.
+
+**Trade 1: SPY 11/23 728C x1, 0.81 → 0.69, −$12. Score 4 (trend, structure, volume, time; breadth and key level missed), T2. Grade: B (process B, outcome loss).**
+A VWAP reclaim on 2.6x volume, but QQQ was still below its VWAP (no breadth). Stop below the 722.73 base low: 0.52 points, $12. The reclaim failed within 4 minutes. A legitimate setup that was thin on breadth.
+
+**Trade 2: SPY 11/23 717P x1, 0.89 → 0.79, −$10. Score 3, T1 (after 2 straight losses). Grade: C (process C, outcome loss).**
+The breakdown was by $0.03 in a choppy tape, with a 0.45-point stop, and it was stopped 28 s after the fill. Within the rules, but the trigger margin was too small to mean anything. Three straight losses now (11-20 690P, 728C, 717P), so the T1 cap carries into tomorrow until a win.
+
+**Skips (22):** 8 failed breaks, 7 size 0, 5 chases, 2 other. All 5 chase skips came from the gap between a bar's close and the check (1.5-2 min). That's the same scheduler-latency pattern as 11-19 and 11-20, and it again cost valid setups (07:18, 07:25, 07:32, 08:38, 08:41).
+
+**Low-delta paper test (day 1, Section 12):** 8 entries.
+- 4 fit their tier: 733C −$14, 664C −$20, 664C +$49 (trail), 735C $0 (breakeven). Net +$15 on 4 fits; 1 win, 2 losses, 1 scratch.
+- 4 did not fit even at delta 0.12-0.15.
+- No time-stop exits among the fits.
+- Too early to read anything; about 16 more needed.
+
+**1DTE shadow:** 728C twin −$12 (same as live); 717P twin −$11 (live −$10). Running tally: 8 pairs, live +$307 vs twin (fit only) +$143.
+
+**Operational:**
+- Weekly usage was at 85% at the open; one usage alert sent. Extra usage is allowed.
+- Launcher fired about 3 min late (06:23).
+
+**Rule change: none by the review.** v8 was made today on Kevin's recorded instruction, and only one change per day is allowed. Chase-limit vs check-latency evidence keeps building (5 lost today). Candidate for Kevin: measure "past the trigger" from the trigger bar's close to the live quote *at the first check after the bar*, and widen the chase limit to $0.60 on checks that fire more than 60 s late.
