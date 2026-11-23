@@ -41,8 +41,8 @@ TRADING (newest playbook; v7 as of 11-18):
   open_positions/open_risk/open_premium to engine.py size.
 - **Breadth:** for SPY trades = QQQ + SMH; for QQQ trades = SPY + SMH.
 - **Timing:** morning read 06:30-06:45, then wait 10-15 min.
-- **Score and tiers:** score 0-2 = no trade. Tiers T1 $10 / T2 $15 / T3 $25 / T4 $35. Never raise a
-  tier dollar amount.
+- **Score and tiers:** score 0-2 = no trade. Base tiers T1 $10 / T2 $15 / T3 $25 / T4 $35, scaled daily by
+  capital (v8; engine.py applies it, `engine.py tiers '{}'`). Never change the base amounts or scaling rule.
 - **Limits:**
   - shared daily loss limit $40 + 50% of realized profit (max $75);
   - T1 cap after 2 straight losses (across both underlyings);
@@ -100,6 +100,10 @@ END OF DAY (flat and after ~10:15 with no position, or 12:30 PT at the latest):
 1. Make sure every shadow_entry has a shadow_result and every lowdelta_entry has a lowdelta_result.
 2. Append a {"event":"summary",...} line (trades, skips, shadow pairs, usage at close, notes) to
    claude/research/journal/spy-0dte/<today PT>.jsonl.
+2b. CAPITAL SCALING (v8, Kevin 2026-11-23): once flat, read get_portfolio total_value and set
+   capital_scaling.day_account (and set_on = today) in claude/trading/spy0dte/config.json; log
+   {"event":"capital_scaling","day_account":...,"factor":...,"tiers":...} (python3 claude/trading/spy0dte/engine.py tiers '{}').
+   Tier caps and the daily loss limit scale by day_account/896.45 (engine applies it). Commit it with the journal.
 3. Commit, ending the message with the two lines
    "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" and "Claude-Session: <this session's URL>".
 4. `git push origin HEAD:claude/spy-0dte-momentum-playbook-53axp4` (retry on network errors).

@@ -1,3 +1,5 @@
+import os
+os.environ["SPY0DTE_CAPITAL_SCALING"] = "0"  # tests assert the base (unscaled) values
 import unittest
 
 import shadow

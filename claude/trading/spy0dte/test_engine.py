@@ -1,3 +1,5 @@
+import os
+os.environ["SPY0DTE_CAPITAL_SCALING"] = "0"  # tests assert the base (unscaled) values
 import unittest
 
 import engine as e
@@ -135,3 +137,22 @@ class Notify(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CapitalScaling(unittest.TestCase):
+    def test_scaled_values(self):
+        cfg = e.load_config()
+        cfg["capital_scaling"] = {"enabled": True, "base_account": 896.45, "day_account": 1224.74}
+        os.environ.pop("SPY0DTE_CAPITAL_SCALING", None)
+        try:
+            s = e.apply_capital_scaling(cfg)
+        finally:
+            os.environ["SPY0DTE_CAPITAL_SCALING"] = "0"
+        self.assertEqual([s["tiers"][k]["max_risk"] for k in "3456"], [13, 20, 34, 47])
+        self.assertEqual((s["daily_loss"]["base"], s["daily_loss"]["max"]), (54, 102))
+        self.assertEqual(cfg["tiers"]["3"]["max_risk"], 10)  # base untouched
+
+    def test_disabled(self):
+        cfg = e.load_config()
+        cfg["capital_scaling"] = {"enabled": False, "base_account": 100, "day_account": 200}
+        self.assertIs(e.apply_capital_scaling(cfg), cfg)

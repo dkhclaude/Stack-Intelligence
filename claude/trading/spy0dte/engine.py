@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import sys
 from datetime import time
 from pathlib import Path
@@ -27,7 +28,26 @@ def load_config(path: Path = CONFIG_PATH) -> dict:
     return json.loads(path.read_text())
 
 
-CFG = load_config()
+def apply_capital_scaling(cfg: dict) -> dict:
+    """Scale tier dollar caps and the daily loss limit by day_account / base_account (v8, Kevin 2026-11-23).
+
+    config.json holds the base values (set when the account was base_account). Each trading day
+    uses day_account (the previous close's account value, updated at end of day). Floors to whole
+    dollars. Disabled when capital_scaling.enabled is false or SPY0DTE_CAPITAL_SCALING=0."""
+    cs = cfg.get("capital_scaling")
+    if not cs or not cs.get("enabled") or os.environ.get("SPY0DTE_CAPITAL_SCALING") == "0":
+        return cfg
+    f = cs["day_account"] / cs["base_account"]
+    out = json.loads(json.dumps(cfg))
+    for t in out["tiers"].values():
+        t["max_risk"] = math.floor(t["max_risk"] * f + 1e-9)
+    out["daily_loss"]["base"] = math.floor(cfg["daily_loss"]["base"] * f + 1e-9)
+    out["daily_loss"]["max"] = math.floor(cfg["daily_loss"]["max"] * f + 1e-9)
+    out["capital_scaling"]["factor"] = round(f, 4)
+    return out
+
+
+CFG = apply_capital_scaling(load_config())
 
 
 def _cents_down(x: float) -> float:
@@ -207,6 +227,9 @@ def _main(argv: list[str]) -> int:
         res = size(arg)
     elif cmd == "stop":
         res = next_stop(arg["entry"], arg["peak_mark"], arg["current_stop"])
+    elif cmd == "tiers":
+        res = {"factor": CFG.get("capital_scaling", {}).get("factor", 1.0),
+               "tiers": {k: v for k, v in CFG["tiers"].items()}, "daily_loss": CFG["daily_loss"]}
     elif cmd == "limit":
         res = {"daily_loss_limit": daily_loss_limit(arg.get("realized_pnl", 0.0))}
     elif cmd == "scale":
