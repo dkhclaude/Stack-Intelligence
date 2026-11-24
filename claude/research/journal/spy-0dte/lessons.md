@@ -298,3 +298,26 @@ The breakdown was by $0.03 in a choppy tape, with a 0.45-point stop, and it was 
 - Launcher fired about 3 min late (06:23).
 
 **Rule change: none by the review.** v8 was made today on Kevin's recorded instruction, and only one change per day is allowed. Chase-limit vs check-latency evidence keeps building (5 lost today). Candidate for Kevin: measure "past the trigger" from the trigger bar's close to the live quote *at the first check after the bar*, and widen the chase limit to $0.60 on checks that fire more than 60 s late.
+
+## 2026-11-24 — no trades, $0 — playbook v8
+
+Robinhood cross-check: no option orders on 759470560 today; flat, account $1,202.56. The journal matches.
+
+**No trades.** Nothing to grade.
+- Size: T1 $13 all day. The 2-loss streak cap carried over from 11-23 (3 straight losses), on top of v8 scaling ×1.34.
+- 22 skips: 9 size 0, 6 failed breaks, 2 no-base, 2 score ≤ 2, 1 chase, plus others.
+- Near miss: the 08:43 SPY put (score 5) sized $14 against the $13 cap at delta 0.21. The break reversed within 2 minutes, so the cap saved about $8-14.
+- Tape: V-reversal open (SPY 712 → 719), then two-sided chop.
+
+**Low-delta paper test, day 2 (Section 12):** 9 entries; only 1 fit the T1 $13 cap.
+- The one that fit: SPY 705P, −$8, stopped the next minute.
+- The 8 that didn't fit were simulated for information at a forced size: mostly losses (−$177 forced in total). 3 time-stop exits, 4 price stops, 1 breakeven.
+- **Running tally after 2 days: 17 entries; 5 fit (net +$7: 1 win, 3 losses, 1 scratch).** About 15 more needed before Kevin decides. Early read: in chop, low-delta entries mostly stop out or time out.
+
+**Operational:**
+- The 5-hour window was at 81% by 08:46 (one alert sent); weekly usage reset to 2% this morning. Extra usage is allowed.
+- One check fired late at 09:00.
+
+**v8 status:** still awaiting Kevin's confirmation that he sent the capital-scaling instruction (flagged 11-23). It made no difference to trading today, because the streak cap held everything at T1.
+
+**Rule change:** none (no trades).
