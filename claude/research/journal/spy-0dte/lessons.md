@@ -321,3 +321,28 @@ Robinhood cross-check: no option orders on 759470560 today; flat, account $1,202
 **v8 status:** still awaiting Kevin's confirmation that he sent the capital-scaling instruction (flagged 11-23). It made no difference to trading today, because the streak cap held everything at T1.
 
 **Rule change:** none (no trades).
+
+## 2026-11-25 — no trades, $0 — playbook v8 → v9 at 10:15 PT
+
+Robinhood cross-check: no option orders on 759470560 today; flat, account $1,202.56. The journal matches.
+
+**No trades.** Nothing to grade.
+- Tape: a chip-led gap down (SPY −2.1%, QQQ −3.2%, SMH −5%), then trend-down chop.
+- Every qualifying setup needed $14-34 of risk against the T1 $13 cap. That cap came from the 3-loss streak carried over from 11-23.
+
+**Kevin's direct instructions to the trader session (recorded in the journal):**
+- 10:12, "There shouldnt be $13 cap." The carried streak cap was dropped for the rest of the day.
+- 10:15, "keep it but reset the streak each morning" → **v9**: the 2-loss T1 cap stays, but the streak counts same-day losses only.
+
+Kevin talking to the trader session directly also makes the 11-23 v8 capital-scaling instruction credible as his. It's treated as confirmed unless he says otherwise.
+
+**Low-delta paper test, day 3:** 7 entries, 0 fit (all needed more than $13 at delta 0.12-0.15).
+- Simulated at a forced size for information: 2 wins (+$27, +$72), 5 losses.
+- **Running tally: 24 entries, 5 fit, net +$7 on the fits.**
+- Fit rate is low (21%) while the T1 streak cap was in force. With v9 the cap resets daily, so more entries should fit.
+
+**Operational:** the 5-hour window was at 81% by 08:31 (one alert sent); weekly at 27%. The 08:31 alert was first journaled unsent and resent at 08:33. The trader session woke a few minutes after its 06:23 launch, which is normal.
+
+**Rule change by the review:** none. v9 was made today by Kevin.
+
+**Tomorrow (11-26) is Thanksgiving:** markets are closed. The trader should send one holiday alert and stop; the handoff and review should skip.
