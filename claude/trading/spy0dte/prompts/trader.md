@@ -45,7 +45,7 @@ TRADING (newest playbook; v7 as of 11-18):
   capital (v8; engine.py applies it, `engine.py tiers '{}'`). Never change the base amounts or scaling rule.
 - **Limits:**
   - shared daily loss limit $40 + 50% of realized profit (max $75);
-  - T1 cap after 2 straight losses (across both underlyings);
+  - T1 cap after 2 straight losses (across both underlyings, today only: the streak resets to 0 each morning, v9);
   - 30% of account cap on total open premium.
 - **Instruments:** long single-leg calls/puts only.
 - **Contract delta:** 0.18-0.25 (playbook Section 6). If the structural stop does not fit the tier at that delta, size 0 and skip;

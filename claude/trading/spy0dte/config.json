@@ -1,5 +1,5 @@
 {
-  "playbook_version": 8,
+  "playbook_version": 9,
   "structural_close_exit": true,
   "underlyings": [
     "SPY",
@@ -42,7 +42,8 @@
   "max_account_fraction_per_trade": 0.3,
   "losing_streak_cap": {
     "streak": 2,
-    "tier": "T1"
+    "tier": "T1",
+    "resets": "daily"
   },
   "volume_multiple": 1.5,
   "time_window_pt": [

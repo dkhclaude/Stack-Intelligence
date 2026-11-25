@@ -47,7 +47,7 @@ E=claude/trading/spy0dte/engine.py
 python3 $E score '{"trend":true,"structure":true,"key_level":true,"breadth":false,"volume":true,"time":true}'
 python3 $E size  '{"factors":{...},"side":"call","entry_premium":0.41,"delta":0.21,
                    "entry_underlying":601.30,"stop_underlying":600.55,
-                   "account_value":<get_portfolio>,"realized_pnl":<today net>,"consecutive_losses":<n>}'
+                   "account_value":<get_portfolio>,"realized_pnl":<today net>,"consecutive_losses":<today's straight losses; resets to 0 each morning (v9)>}'
 python3 $E stop  '{"entry":0.41,"peak_mark":0.62,"current_stop":0.25}'
 python3 $E scale '{"contracts":2,"entry":0.41,"mark":0.62,"already_scaled":false}'
 python3 $E limit '{"realized_pnl":12.0}'
