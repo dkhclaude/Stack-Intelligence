@@ -37,6 +37,19 @@ win_rate: 0%
 wtd_pnl: 0.00
 mtd_pnl: 0.00
 open_positions: 0
-r
+rules_broken: 0
+---
+(Kevin, 2026-11-26: the cut-off "r" line is rules_broken; this format is final.)
 
-[NOTE: Kevin's original instructions were cut off at this point. Until he supplies the rest, finish the front matter with `rules_broken: <count>` and `---`, then use these sections: "Accounts covered", "Summary" (net realized P&L, win rate, biggest win/loss, WTD, MTD, open positions), "Trades" table (#, contract, side, qty, entry time PT, entry price, exit time PT, exit price, P&L, exit type, placed by, strategy), short trade notes, "Open positions", "Rules broken" (checked against the newest claude/research/specs/spy-0dte-playbook-v*.md for Claude's trades), and "Paper only" (Phase A 1DTE shadow twins and low-delta paper entries from claude/research/journal/spy-0dte/<today>.jsonl, clearly marked as never ordered). If fees are not itemized by the broker, write "fees: NOT AVAILABLE – not itemized by broker". The 2026-11-17 [TEST] email is the reference layout.]
+Then these sections, in order:
+1. Accounts covered: Robinhood ••0560 (agentic options); Robinhood ••1041: not included (Kevin's choice).
+2. Summary: net realized P&L, trades and win rate, biggest win, biggest loss, WTD, MTD, open positions.
+3. Trades: a table with #, contract, side, qty, entry time PT, entry price, exit time PT, exit price, P&L, exit type,
+   placed by, strategy. Then one short note per trade.
+4. Open positions: each nonzero position with qty, average cost and the resting stop, or "None".
+5. Rules broken: Claude's trades checked against the newest claude/research/specs/spy-0dte-playbook-v*.md; list each
+   break with the rule and the trade #, or "None".
+6. Paper only (never ordered): Phase A 1DTE shadow twins and low-delta paper entries from
+   claude/research/journal/spy-0dte/<today>.jsonl, clearly marked as paper. Write "None" if there are none.
+If the broker doesn't itemize fees, write "fees: NOT AVAILABLE – not itemized by broker". The 2026-11-17 [TEST] email
+is the reference layout.
