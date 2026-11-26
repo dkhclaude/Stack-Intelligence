@@ -1,4 +1,4 @@
-SPY playbook daily review (post-close). Fresh session started by the launcher. READ-ONLY on the
+SPY playbook daily review (post-close). Fresh session started by the supervisor (prompts/supervisor.md). READ-ONLY on the
 brokerage: never place, cancel or modify any order. (Source: claude/trading/spy0dte/prompts/review.md.)
 
 0. You should be on branch claude/spy-0dte-momentum-playbook-53axp4 (or main if merged); `git pull`.
@@ -23,3 +23,6 @@ brokerage: never place, cancel or modify any order. (Source: claude/trading/spy0
 5. Send one NTFY summary to Kevin (day P&L, grades, rule change or none):
    `NTFY_TOPIC=DKHSpyOct python3 claude/trading/spy0dte/notify.py alert '{"topic":"daily review","text":"..."}'`.
    If the send is blocked by a permission check, record that in lessons.md; don't work around it.
+
+6. Market holiday or no journal for today: write "no trading (holiday/closed)" in lessons.md, commit, push, stop.
+7. Keep it lean: short replies, read only what the review needs. Do not reply to or wake other sessions.

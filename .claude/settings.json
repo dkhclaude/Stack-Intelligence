@@ -4,5 +4,6 @@
       "mcp__claude-code-remote__create_session",
       "mcp__claude-code-remote__send_message"
     ]
-  }
+  },
+  "autoCompactWindow": 200000
 }
