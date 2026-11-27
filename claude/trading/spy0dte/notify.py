@@ -38,7 +38,7 @@ def format_message(kind: str, d: dict) -> tuple[str, str]:
                 raise ValueError(f"fill message requires '{k}'")
         title = f"FILL {d.get('side', '').upper()} {d.get('symbol', '')}".strip()
         body = (f"{d.get('qty', '?')}x @ {d.get('price', '?')} | score {d['score']}/6 {d['tier']}"
-                f" (max risk ${d.get('max_risk', '?')}) | factors: {', '.join(d['factors'])}"
+                f" (max risk ${d.get('max_risk', '?')}) | factors: {d['factors'] if isinstance(d['factors'], str) else ', '.join(d['factors'])}"
                 f" | stop {d.get('stop', '?')} ({d.get('stop_basis', 'structural')})")
     elif kind == "exit":
         title = f"EXIT {d.get('symbol', '')}"

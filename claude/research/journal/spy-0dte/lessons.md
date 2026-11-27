@@ -346,3 +346,47 @@ Kevin talking to the trader session directly also makes the 11-23 v8 capital-sca
 **Rule change by the review:** none. v9 was made today by Kevin.
 
 **Tomorrow (11-26) is Thanksgiving:** markets are closed. The trader should send one holiday alert and stop; the handoff and review should skip.
+
+## 2026-11-27 — 2 trades, −$30 — playbook v9 → v10 (early close)
+
+Robinhood cross-check (759470560): 2 round trips plus 1 cancelled unfilled entry (728C @ 0.42). P&L history shows −$25 and −$5, which matches the journal. Flat. Account $1,172.38.
+
+Early close (13:00 ET): no entries after 09:15 PT and flat by 09:45 PT. Both were followed: the last entry was 08:50 PT and the session was flat at 08:56.
+
+**Trade 1: SPY 729C, 1x, 0.57 → 0.32, −$25. Grade B (good process, loss).**
+- Score 5/6, T3 (cap $33). Factors: trend, structure, key level, breadth, time. Volume missed.
+- Setup: a break of the 726.05 session high after a 724.71-725.91 flag. QQQ made a new high and SMH was confirming.
+- Stop: structural, at the 725.34 higher low. Delta 0.248 converts it to an option stop of 0.32 (risk $25 against the $33 cap). Premium $57, well under 30%.
+- Right: earlier, at 07:38, the 728C limit went stale and was cancelled, with no chase. The resting stop filled exactly at 0.32.
+- Wrong: premium 0.57 was above the 0.35-0.45 guide. The flag range was $1.20, a little loose against the "under $1.00" rule.
+- Outcome: the breakout failed within 3 minutes.
+
+**Trade 2: SPY 729C, 1x, 0.37 → 0.32, −$5. Grade B− (rules followed; lag cost about $5).**
+- Score 5/6, T3. Volume missed again. Taking T3 was allowed with 1 loss on the day.
+- Setup: the 16:48Z close of 727.01 broke the 726.96 high of day by $0.05. QQQ and SMH were confirming.
+- Stop: 726.35 higher low → option stop 0.20 (risk $17).
+- What happened: the option peaked at a 0.54 close (+46%) at 16:53Z, between checks.
+  - At the next check the peak-close rule (Section 8) was applied correctly, but the option was already back near 0.37.
+  - The breakeven stop was rejected because the ask was at 0.37.
+  - The trader sold at market for 0.32 right after confirming the cancel. That was correct, and better than the old 0.20 stop.
+- Lesson: when a fast spike happens between 1-minute checks, the ladder can't protect it. The real fix is check cadence or a resting ladder, not a rule.
+
+**Pattern:** both entries broke a holiday-session high with volume missing (score 5), and both failed fast. Two trades is too few to change the volume weighting. Watch whether score-5, volume-missed breakouts keep failing.
+
+**Skips:** 4 skips (stalled break, low-volume break, stale trigger, counter-trend flush) and 1 missed entry. All were consistent with the playbook.
+
+**1DTE shadow (Section 11):** 2 pairs today; both twins fit their tier.
+- 734C twin: −$25 (live −$25). Stopped out by the same move.
+- 735C twin: −$16 (live −$5). The twin peaked at only +8.9%, never reached breakeven, and was stopped.
+- Twins did not avoid any wick stop-outs today.
+- **Running tally: 10 pairs. Live +$277 vs twin (fits only) +$102.** The Phase B go-live test is not met (needs 20 pairs, and the twin at least as good as live).
+
+**Low-delta paper test:** 0 entries today.
+
+**Rule change: v10, Section 8, rejected stop move.** If a stop move is rejected because the quote is already at or through the new stop, treat the stop as hit and close at once; never restore the old stop.
+- Evidence: trade 2 above. The spec said nothing about this case, so this codifies what the trader did.
+- `config.json`: `playbook_version` 10, `stop_reject_exit` true. Tests: 26 OK.
+
+**Non-rule fix:** `notify.py` printed a string `factors` letter by letter in the trade 1 fill NTFY ("t, r, e, n, d, …"). It now prints strings as given.
+
+**For Kevin: standing early-close rule?** Today's limits (no entries after 09:15 PT, flat by 09:45 PT) came from a supervisor note, not the playbook. A standing rule would make this automatic. Suggested wording: "On NYSE 13:00 ET early-close days, no entries after 09:15 PT and flat by 09:45 PT." The next early close is 12-24. Kevin decides; it is not added here.

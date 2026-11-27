@@ -1,6 +1,7 @@
 {
-  "playbook_version": 9,
+  "playbook_version": 10,
   "structural_close_exit": true,
+  "stop_reject_exit": true,
   "underlyings": [
     "SPY",
     "QQQ"
