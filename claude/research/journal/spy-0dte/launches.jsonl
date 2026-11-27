@@ -1,0 +1,9 @@
+{"ts":"2026-11-18T06:21:32-08:00","event":"launch","date":"2026-11-18","session_id":"session_01QmVL2NDv1TPG5dmRsonEYZ","launcher":"session_01QmVL2RxWfPPixYi479UTvX","note":"logged in launches.jsonl (not the day journal) so the trader session own journal pushes do not conflict"}
+{"ts":"2026-11-19T06:21:38-08:00","event":"launch","date":"2026-11-19","session_id":"session_01QmVL2Qc9njnqArPnGW3y2B","launcher":"session_01QmVL2RxWfPPixYi479UTvX"}
+{"ts":"2026-11-20T06:21:07-08:00","event":"launch","date":"2026-11-20","session_id":"session_01QmVL2N9RtV91HySsocwCQi","launcher":"session_01QmVL2RxWfPPixYi479UTvX"}
+{"ts":"2026-11-23T06:24:12-08:00","event":"launch","date":"2026-11-23","session_id":"session_01QmVL2N3t1xHEBWykJA3Q6x","launcher":"session_01QmVL2RxWfPPixYi479UTvX","note":"first day with low-delta paper test (Section 12) and explicit delta rule"}
+{"ts":"2026-11-24T06:21:26-08:00","event":"launch","date":"2026-11-24","session_id":"session_01QmVL2Pj8TL9iD1M5w3YaKR","launcher":"session_01QmVL2RxWfPPixYi479UTvX","note":"v8 capital scaling still pending Kevin confirmation"}
+{"ts":"2026-11-25T06:21:55-08:00","event":"launch","date":"2026-11-25","session_id":"session_01QmVL2SCX2v3s27uRt3YDnk","launcher":"session_01QmVL2RxWfPPixYi479UTvX"}
+{"ts":"2026-11-27T06:21:34-08:00","event":"launch","job":"trader","date":"2026-11-27","session_id":"session_01QmVL2NZ1U75DfwfFPH2Joe","launcher":"session_01QmVL2NWPDLRBRN5aRBzSZu","note":"early close 10:00 PT; supervisor note: flat by 09:45, no entries after 09:15"}
+{"ts":"2026-11-27T13:24:23-08:00","event":"launch","job":"review","date":"2026-11-27","session_id":"session_01QmVL2Mq3r7AmTHdnxx9P4j","launcher":"session_01QmVL2NWPDLRBRN5aRBzSZu"}
+{"ts":"2026-11-27T13:46:42-08:00","event":"launch","job":"handoff","date":"2026-11-27","session_id":"session_01QmVL2RfnLygbJ1YPFPnnAe","launcher":"session_01QmVL2NWPDLRBRN5aRBzSZu"}

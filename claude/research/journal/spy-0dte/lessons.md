@@ -1,0 +1,392 @@
+# SPY 0DTE playbook - lessons log
+
+Appended by the daily review (weekdays 13:23 PT). Newest at the bottom.
+
+## 2026-11-09 (seeded from playbook v1)
+
+- A 22% fixed stop on a 0.09-delta contract was stopped out by a 45-cent SPY wiggle.
+  Lesson: stops come from structure, converted to option price with delta, and size adjusts to fit the tier cap.
+
+## 2026-11-10 — 2 trades, 2 wins, +$51 (fees ~$0.16) — playbook v1
+
+Robinhood cross-check: all four fills match the journal (754C 0.62→0.86, 744P 0.48→0.75). Kevin separately sold XBI and NTRA equity in this account (not agent-initiated).
+
+| # | Contract | Score / tier | Factors | Entry → exit | P&L | Process grade | Outcome |
+|---|----------|--------------|---------|--------------|-----|---------------|---------|
+| 1 | SPY 754C | 6/6 T4 ($35) | trend, structure, key_level, breadth, volume, time | 0.62 → 0.86 | +$24 | **B+** | Good |
+| 2 | SPY 744P | 5/6 T3 ($25) | trend, structure, breadth, volume, time | 0.48 → 0.75 | +$27 | **B-** | Good |
+
+**Trade 1 (754C).** Entry was textbook: 06:56 break of the 749.60 session high on 1.4x volume with QQQ/SMH at new highs, VWAP reclaim, structural stop below VWAP sized by the engine ($32 vs $35 cap). Minor: premium 0.62 was above the 0.35–0.45 guideline (delta 0.21 was in range). Ladder was followed exactly (+85% peak → stop 0.87). The stop_market was hit by a one-minute SPY wick to 750.63 and the option was back at 1.05 a minute later — the rule, not the execution, cut the winner. One sample; logged, not acted on yet.
+*Lesson:* a tight option-price lock on a 0.2–0.3 delta 0DTE is vulnerable to 1-minute noise. Watch for a second instance before changing the ladder.
+
+**Trade 2 (744P).** Entry valid but generous: volume factor was barely met (42,970 vs 42,323 needed), structure credited for a VWAP loss after an opening-range chop. Correctly skipped the 745P whose stop didn't fit and took the 744P. Ladder followed (0.27 → 0.60 → 0.79 trail). The early-exit signal (2 higher 1m lows after the 746.00 LOD) was valid, but execution was poor: cancelled the 0.79 stop, then sent a 0.89 limit at a stale bid; bid fell to 0.74 within ~10 s; sold at market 0.75 — $0.04 below the cancelled stop and ~25 s unprotected.
+*Lesson:* after the cancel confirms, exit with a market/marketable order. → **Rule change v2.**
+
+**Missed / skipped.**
+- 09:37 SPY broke the 745.87 LOD on 70k volume with breadth confirming; the send_later check fired ~6 min late (checks ran 2–6 min late from ~09:35), so the entry was missed and correctly not chased.
+- Many stand-asides in 08:00–10:15 chop were correct (SPY repeatedly held its LOD while QQQ/SMH made new lows).
+- Yesterday (11-09) the 10:20 self-imposed cutoff was followed by the real breakout to 755.42 — the cutoff was not a playbook rule; dropped today.
+
+**Rule change:** v2 — discretionary exits use a market/marketable order immediately after the stop cancel confirms (evidence: trade 2). No dollar amounts, limits or tiers changed.
+
+## 2026-11-11 — 3 trades, 2 wins / 1 loss, +$37 — playbook v2
+
+Robinhood cross-check: all 7 fills match the journal (760C 0.25→0.39; 761C x3 0.30→0.21; 761C x2 0.30→0.58 (1) / 0.52 (1)). Kevin deposited $300 after the session.
+
+| # | Contract | Score / tier | Factors | Entry → exit | P&L | Process grade | Outcome |
+|---|----------|--------------|---------|--------------|-----|---------------|---------|
+| 1 | SPY 760C x1 | 4/6 T2 ($15) | trend, structure, breadth, time | 0.25 → 0.39 | +$14 | **B** | Good |
+| 2 | SPY 761C x3 | 5/6 T3 ($25) | trend, structure, key_level, breadth, time | 0.30 → 0.21 | −$27 | **C** | Bad |
+| 3 | SPY 761C x2 | 5/6 T3 ($25) | trend, structure, key_level, breadth, time | 0.30 → 0.58 / 0.52 | +$50 | **A−** | Good |
+
+**Trade 1 (760C).** Valid breakout/retest entry, stop below the 757.05 retest, sized by the engine ($11 of $15). Ladder followed (BE → 0.31 → trail 0.39 at 75% of 0.525). The trail was hit by a 1-minute SPY dip to 758.21 and the option was back at 0.415 a minute later — third straight day a ladder/trail stop was taken by a one-minute wick (11-10 754C, 11-11 760C, and now arguably the 761C#2 runner, though that one exited on a real pullback). Still within the rules; keep collecting evidence on the trail width before changing it.
+
+**Trade 2 (761C x3).** Entry was honest (QQQ/SMH at new highs; volume 1.2x correctly scored 0) and the limit was not chased. Two process faults: (a) the stop was placed at SPY 758.80, just under the 758.85 breakout level, instead of below the base low 758.62 — SPY retested exactly 758.62, stopped the trade, then ran to 761.02; (b) the limit filled ~90 s before the next check, so the position sat without a stop for ~90 s.
+*Lesson:* the stop goes below the base, not under the breakout. → **Rule change v3.** Operationally: after placing an entry limit, re-check the order within the same turn (done on trade 3).
+
+**Trade 3 (761C x2).** Waited for SPY to reclaim and close above the prior high with QQQ/SMH at new highs; stop below the 758.965 higher low; stop placed 8 s after the fill. Ladder executed exactly with cancel-confirm-replace each time: BE at +35%, scaled 1 at +93% (market, 0.58), runner stop 0.42 → 0.49 → 0.52, exited at 0.52 on the pullback from 760.62. Minor: the scale-out rule triggers at +50% but the check landed at +78% — 1-minute polling granularity, worked in our favor this time.
+
+**Skipped.** 08:26 HOD break (score 4, 761C sized 0; the only fit was a 0.12-delta 762C at a whole-premium stop — correctly not contract-shopped). 09:22 SPY 761 break (score 4, volume 1.44x) — also untradeable: buying power $8.91 because same-day sale proceeds don't settle in a cash account. Kevin's $300 deposit arrived after the 10:15 cutoff.
+
+**Rule change:** v3 — initial stops go below the base/flag low (or latest higher low) with a $0.05 buffer, never just under the breakout level; size down or skip if it doesn't fit (evidence: trades 2 vs 3). No dollar amounts, limits or tiers changed.
+
+## 2026-11-12 — 1 trade, 1 win, +$20 — playbook v3
+
+Robinhood cross-check: both fills match the journal (764C 0.49 -> 0.69 stop). Account $876.54 after Kevin's $300 deposit.
+
+| # | Contract | Score / tier | Factors | Entry → exit | P&L | Process grade | Outcome |
+|---|----------|--------------|---------|--------------|-----|---------------|---------|
+| 1 | SPY 764C x1 | 5/6 T3 ($25) | trend, structure, key_level, breadth, time | 0.49 → 0.69 | +$20 | **A−** | Good |
+
+**Trade 1 (764C).** Entry was a textbook pullback-to-structure: after the 07:57 trend leg, SPY pulled back to 759.98, held above the 759.6–760.0 breakout zone, and turned up with QQQ/SMH (08:05). v3 stop below the pullback low (759.93); engine sized 1 contract ($21 risk). The limit was checked 20 s after placing; the stop went in 18 s after the fill. Volume was correctly scored 0. Management: the 08:12 check fired ~3 min late and saw 0.955, but the option had closed at **1.02 at 08:11** (option historicals). Under the ladder the stop should have been the 75% trail (0.76), not the +40% lock (0.69); the exit came at 0.69 vs ~0.76 available. Replay check: a looser ladder would not have helped. The option rebounded to 1.04 at 08:20, then fell to 0.22 by 08:41.
+*Lesson:* late checks understate the peak; read the bars since the last check. → **Rule change v4.**
+
+**Skips (all correct by the rules).** 06:51 break (score 4, $33/contract stop vs $15 cap); 07:54 762C limit cancelled unfilled as the option ran 0.42 → 0.52 (no chase, no resting entry; this avoided the 11-11 unprotected-fill problem); 07:57–08:00 legs extended > $1 from structure; 08:20–08:23 double top at 763.0 on light volume; 08:47 bounce score 4 with QQQ/SMH diverging; 08:53 score 3 (761.19 is not a qualifying key level); 09:00–10:07 dead chop. Missed upside was real (SPY ran 757.8 → 763.0), but each skip followed the score/size rules. Rechecking the "wicked ladder" pattern with option bars shows the ladder protected gains today, so the earlier wick pattern is now weaker evidence than it looked.
+
+**Rule change:** v4: the ladder peak mark includes the highest 1-minute option close since the previous check. No dollar amounts, limits or tiers changed.
+
+## 2026-11-13 — no trades, $0 — playbook v5 (first SPY + QQQ day)
+
+Robinhood cross-check: no option orders on 759470560 today; account $896.45 cash, flat. Journal summary matches.
+
+**No trades.** Nothing to grade on process vs outcome. Skips, each checked against the rules:
+- 08:21 QQQ LOD break (1.66x): reversed at once, and the check fired late anyway.
+- 08:51 SPY put: score 3, stop ~$26 > $10 → 0 contracts.
+- 09:06 VWAP reclaim: seen at 09:10 as a chase, and its risk didn't fit T2. It failed 09:11–13.
+- 09:15 breakdown: 0.85x volume.
+- 09:26 QQQ: score 3, ~$37 risk.
+- 09:35 SPY call: score 4, $16 risk vs the $15 cap. It double-topped and would have stopped out at 09:39 for about −$16, so the cap protected the account.
+- 10:02 SPY/QQQ breakdown: score 4, 2.0x volume, reclaimed at 10:03 before the late check ran.
+
+**What cost opportunity was operational, not the rules.** The Robinhood 502 outage (06:20–07:12) covered most of the trend-down open (SPY 760 → 747.9). MCP disconnects made checks fire 3–22 min late all morning. After 09:13 the market was VWAP chop, where structural stops were mostly wider than the T1/T2 caps — the playbook correctly stood aside.
+
+**Evidence to keep collecting (no change today):** whether late check-ins should get a "trigger bar must be ≤ 1 bar old" rule spelled out in the spec (it was applied by judgment at 09:10 and 10:05).
+
+**Rule change:** none (no trades — per the review spec, no rule change). No dollar amounts, limits or tiers changed.
+
+## 2026-11-16 — no trades, $0 — playbook v6 (Phase A day 1)
+
+Robinhood cross-check: no option orders and no positions on 759470560; account $896.45 cash, flat.
+
+**No trades and no shadow pairs. The cause was the weekly Claude usage limit, not the rules.**
+- The morning read (gap down) and four checks ran normally from 06:46 to 07:01 PT, with nothing triggering in the opening-range chop.
+- At 07:02 PT the account hit its **7-day Claude usage limit** (API 429 `usage_limit_reached`; extra usage disabled: `out_of_credits`). The 07:01 check died before it could re-arm, and nothing ran until the limit reset at 04:00 UTC on 11-17.
+- SPY broke its opening-range low within minutes and trended down all day: 746.6 → 743.3 by 07:30, a low of 738.07 and a close near 740. QQQ fell 666.6 → 660.5.
+- The put setup in the 07:01 check prompt very likely fired, so this was a missed opportunity.
+- Nothing was left unprotected, because no position was open.
+
+**Lesson (operational):** each check ran inside one very long conversation and re-read about 490k tokens of history, roughly $0.47 at list price per check. That burned the weekly allowance. The fixes are a fresh session per trading day (about 20x less usage per check), a morning usage check with an NTFY warning, and extra-usage credits as a backstop. Proposed to Kevin; none of this is a playbook rule.
+
+**Rule change:** none (no trades). No dollar amounts, limits or tiers changed.
+
+## 2026-11-17 — 2 trades, +$164 — playbook v6 (Phase A day 2)
+
+Robinhood cross-check: 4 filled option orders on 759470560 match the journal (729P buy 0.94 / stop-sell 2.60; 739C buy 0.66 / sell 0.64). Account $896.45 → $1,060.27 cash, flat, no open orders.
+
+**Trade 1 — SPY 11/17 729P x1, 0.94 → 2.60, +$166. Score 6/6, T4 ($35). Grade: A (process A, outcome A).**
+Put on the breakdown with all six factors, sized by the engine to 1 contract, structural stop above the lower high (option 0.71). The ladder was followed with cancel → confirm → replace on each move (1.61 → 1.94 → 2.61, peak 3.49), and the 75% trail took the exit at 2.60. An earlier score-6 attempt (730P, 07:31) went unfilled and was cancelled and confirmed without chasing. The process was right.
+*Lesson:* the ladder did its job on a fast leg. No change.
+
+**Trade 2 — SPY 11/17 739C x1, 0.66 → 0.64, −$2. Score 4/6 (trend, structure, key_level, breadth; volume and time missed), T2 ($15). Grade: B (process B, outcome neutral).**
+- *Right:*
+  - It was a continuation entry after the 09:05 news impulse: the flag held above 733.37, the pullback low was 733.74, and the close at 734.41 was above the flag.
+  - The score was honest. Volume was 1.25x, not counted.
+  - The engine gave exactly $15 risk for 1 contract. The stop went in 9 s after the fill.
+  - When SPY closed below the 733.69 structural level (733.61, then 733.41), I exited on the underlying close. The option stop had not fired: delta drifted 0.21 → 0.19 and the option held 0.63 against a 0.51 stop. That turned a likely −$15 into −$2.
+- *Wrong:*
+  - The fill NTFY was journaled but **not sent** on the first try, because NTFY_TOPIC was unset in the environment. It was re-sent with the topic about 1 minute later.
+  - The exit limit was $0.01 through the bid, not the ≥ $0.05 that Section 8 requires. It still filled at 0.64.
+  - Entering near the top of a range that had just rejected was a marginal location.
+- *Lesson:* the delta-converted option stop is only an estimate of the structural level. When the underlying closes through the level, the setup is broken whatever the option shows. → **Rule change v7.**
+
+**Skips.** Each skip followed the rules:
+- 07:10, 07:16–18, 08:22, 08:30–32
+- 08:37: size 0
+- 08:51: whipsaw
+- 08:55: no volume, size 0
+- 09:03: call rejected at 731.15
+- 09:08: impulse with no flag
+- 09:19: chase $0.43 > $0.40
+- 09:39–10:14: no-volume probes of 731.2–731.7
+
+**Operational misses:**
+- Three valid triggers (08:45, 08:58, 09:17) fired between 2–3 min checks and were missed or became chases.
+- Usage reached 87% of the 5-hour window by 10:15. Checking every minute is not affordable in this session.
+
+**Phase A shadow:**
+
+| Pair | Live 0DTE | 1DTE twin | Twin result | Fit tier? |
+|---|---|---|---|---|
+| #1 | +$166 | 725P 11/18 | +$149 | Yes |
+| #2 | −$2 | 743C 11/18 | −$1 nominal | No ($16 > $15), 0 contracts |
+
+Running tally: 2 paired signals, twin fit 1/2, live +$164 vs twin (fit only) +$149.
+
+**Follow-ups (not rule changes):**
+- Give `notify.py` a default topic so a missing env var cannot silence a fill alert.
+- Kevin's pending decision on extra usage credits vs. permission rules for fresh sessions.
+
+**Rule change:** v7. Section 7 adds a structural-close exit: exit when a completed 1-minute underlying close is beyond the structural stop, even if the option stop hasn't triggered. No dollar amounts, limits or tiers changed.
+
+## 2026-11-18 — no trades, $0 — playbook v7 (first fresh-session trader day)
+
+Robinhood cross-check: 1 option order on 759470560: an SPY 11/18 723P limit at 0.73 (08:18 PT), cancelled with nothing filled. No fills, no positions. The journal matches.
+
+**No trades.** Nothing to grade on process vs outcome. The one entry attempt went by the rules:
+- 08:16 SPY put on a new low with QQQ and SMH confirming: score 5, T3.
+- The limit order at the ask didn't fill; the ask ran to 0.83 within about 6 s.
+- The order was cancelled and the cancel confirmed. SPY was more than $0.40 past the trigger, so no chase.
+
+**Skips (13).** All by the rules, and most were size 0. A delta-0.17-0.20 contract with a structural stop 1.25-1.9 points away risks $25-37 per contract, which is over the T1 ($10) and T2 ($15) caps and sometimes the T3 ($25) cap. Other skips were failed breaks that closed back inside within a minute (07:33, 07:49, 08:21) or had no breadth or volume. SPY drifted lower all morning (733.4 → about 727) in small legs without clean bases.
+
+**Operational:**
+- **Fresh-session trader worked:**
+  - started 06:21, checked every minute 06:45-09:30, pushed its journal, and wrote the end-of-day summary at 10:15;
+  - the launcher's 06:32 and 08:00 checks passed.
+- **Usage:** the 5-hour window still hit 100% at about 09:52 PT, and the rest of the session ran on extra usage. Weekly usage is now 47%. The trader's per-check cost grew as its context grew (about $0.16 → $0.20 per check).
+- **1DTE shadow, overnight:** both 11-17 twins gapped hard against their entries at today's open: 725P 2.05 → 0.67 and 743C 1.41 → 0.60. That confirms the overnight risk budget of $0.
+
+**Evidence to keep collecting (no change today):**
+- How often a structural stop × delta 0.20 is too big for T1/T2: 6 of 13 skips today.
+- If it keeps happening, the candidate change is to prefer delta 0.12-0.15 when the stop is wide. That is a contract-choice change, not a dollar-amount change.
+
+**Rule change:** none (no trades, per the review spec). No dollar amounts, limits or tiers changed.
+
+## 2026-11-19 — 1 trade, +$105 — playbook v7
+
+Robinhood cross-check: 2 filled option orders on 759470560 match the journal (SPY 11/19 725P buy 1.12 at 07:28; trailing stop_market sell 2.17 at 07:42). Robinhood realized P&L for the day: +$105.
+
+**Trade 1: SPY 11/19 725P x1, 1.12 → 2.17, +$105. Score 5/6 (trend, structure, key_level, breadth, time; volume missed), T3 ($25). Grade: A (process A, outcome A).**
+
+What went right:
+- Clean bear-flag break: the 07:25 close at 730.53 was below the 731.245 base low, with QQQ and SMH confirming.
+- Structural stop above the 732.18 lower high (SPY 732.23), converted with delta 0.227: $23 of risk, fits T3.
+- Engine size was 1 contract. The stop and the fill NTFY went out right after the fill.
+- The ladder was followed exactly, with cancel → confirm → replace and an NTFY each time:
+  - 0.89 → 1.40 (+50% lock)
+  - 1.40 → 1.57 (+80% lock)
+  - 1.57 → 2.18 (75% trail of the 2.91 peak)
+- It filled at 2.17, 1 cent under the stop.
+
+What went wrong: nothing in the process.
+
+*Lesson:* the 75% trail locked in +94% on a fast leg. The option then gave back further as SPY bounced 07:42-07:50.
+
+**1DTE shadow (pair #3):** the SPY 11/20 721P twin fit T3 (risk $24). It peaked at only +87%, so it stayed on the +40% lock and exited at 2.74: +$78 vs live +$105.
+
+Running tally:
+- 3 pairs: live +$269 vs twin (fit only) +$227
+- the twin fit its tier in 2 of 3 pairs
+
+**Skips (11):** all by the rules.
+- **Size 0 / no base:** the 08:51-08:53 impulse flushes, where the nearest structural stop was 2.9-3.4 points away.
+- **No chase:** the 07:17 and 09:03 breaks were more than $0.40 past their triggers.
+- **Failed breaks:** 07:14 and 07:51.
+
+SPY trended down hard after the trade (731 → 719), mostly in single-bar flushes with no base. The playbook stands aside in that kind of move by design.
+
+**Operational:**
+- **Late scheduler wakes:** two of the 1-minute checks fired late, by about 3.5 min (07:14) and 1.7 min (07:17). The 07:14-07:15 SPY + QQQ breakdown on 154k/170k volume was missed as a chase because of it.
+- **Usage:** the 5-hour window was at 80% by 08:59 and the weekly at 60% (one alert sent). Extra usage is allowed, so trading continued.
+
+**Evidence to keep collecting (no change today):**
+1. **Wide structural stops.** Two days of size-0 skips where the stop × delta 0.20 was more than the cap: 6 of 13 on 11-18, and 4 of 11 today. The candidate change is a lower-delta contract (0.12-0.15) when the structural stop is more than 1.2 points. It is not adopted yet: there's no replay of how those lower-delta contracts would have done, and impulse flushes with no base are exactly what the structure factor is meant to filter out.
+2. **Scheduler lateness.** It cost one signal today. That's infrastructure, not a playbook rule.
+
+**Rule change:** none. Today's single trade followed the rules exactly, and the open questions need replay evidence first. No dollar amounts, limits or tiers changed.
+
+## 2026-11-20 — 3 trades, +$60 — playbook v7
+
+Robinhood cross-check: 7 filled option orders on 759470560 match the journal:
+- 724C x1: 1.07 → stop 0.89
+- 695P x3: 0.61 → 1@1.00, 2@0.91
+- 690P x1: 0.55 → stop 0.34
+
+Robinhood realized P&L for the day: +$60 (4 closing fills). Flat at close.
+
+**Trade 1: SPY 11/20 724C x1, 1.07 → 0.89, −$18. Score 5 (volume missed), T3. Grade: B+ (process B+, outcome loss).**
+- Right: a reclaim of the prior-day low (715.65) and the high of day on a gap-down open, with QQQ and SMH confirming. Delta 0.208 was in the spec. Stop below the 715.64 pullback low (SPY 715.59), $18 of risk. The stop was placed immediately.
+- Wrong: the stop was only 0.84 points under entry, against a 2-point 1-minute range on a gap day. SPY tagged 718.29, then reversed through the stop within a minute. It was a legitimate structural level, but a thin one. The option's peak was +21%, under the +30% breakeven step.
+- *Lesson:* on gap days with wide 1-minute bars, a sub-1-point structural stop is noise-level. This is evidence for the existing rule against chasing thin bases, not for a new rule.
+
+**Trade 2: SPY 11/20 695P x3, 0.61 → 1@1.00 + 2@0.91, +$99. Score 6, tier T4 capped at the $22 of daily room left. Grade: B (process B, outcome A).**
+- Right:
+  - A flag break below 705, with all six factors.
+  - Size capped by the remaining daily loss room ($40 limit − $18 = $22), exactly as Section 4 requires.
+  - Breakeven at +30%, the +25% lock at +50%.
+  - Scaled out half at +50% per Section 8, then took the early profit on a 25%-of-peak give-back within 3 minutes.
+- **Rule deviation:** the contract was delta 0.139. Section 6 specifies delta ~0.18-0.25, and the trader's own 06:56 skip note said so ("would need d~0.10, outside the 0.18-0.25 spec"). The lower delta is what let 3 contracts fit the $22 room with a 0.46-point stop. It worked this time, but it was not a playbook choice.
+
+**Trade 3: SPY 11/20 690P x1, 0.55 → 0.34, −$21. Score 5 (time missed), T3. Grade: C+ (process C+, outcome loss).**
+- Right: the 700-round / low-of-day break had QQQ and SMH confirming. Structural stop at 701.19. The stop order was placed immediately.
+- Wrong:
+  - **Delta 0.13 again, outside the 0.18-0.25 spec.**
+  - At low delta the option bled from theta while SPY chopped 699-701 for 20 minutes. The option stop (0.34) filled even though the structural level (701.19) was never hit. A low-delta 0DTE contract loses value from time alone, so a delta-converted stop acts like a time stop.
+  - It came 9 minutes after the 09:30 cadence change, at a level (700) that had already been broken and reclaimed twice.
+- *Lesson:* the two low-delta trades netted +$78 (+$99 −$21), but the 690P shows the cost. A low-delta contract's stop gets hit by theta, not by price structure. This needs Kevin's decision, not a quiet drift in practice.
+
+**1DTE shadow (pairs #4-6):**
+
+| Pair | Live | 1DTE twin | Twin fit? |
+|---|---|---|---|
+| 724C | −$18 | 729C −$28 (gapped through stop in the simulation) | yes |
+| 695P | +$99 | 682P −$12 (wick stop-out: 0.46-point stop at delta 0.13 was inside 1-minute noise) | yes, 2 contracts |
+| 690P | −$21 | 677P −$21 | yes |
+
+Running tally:
+- 6 pairs: live +$329 vs twin (fit only) +$166
+- the twin fit its tier in 5 of 6 pairs
+- 1DTE did worse than 0DTE on 3 of the 5 comparable pairs this week
+
+**Skips (25) and operational:**
+- Most skips were size 0: wide structural stops on a 40-point trend-down day (SPY 716 → 699), mostly made of single-bar flushes.
+- The 07:44 SPY setup did fit the risk limit (stop 708.99, about $15). It was missed because send_later rounded a 1-minute re-arm to about 2 minutes (armed 07:44:43, fired 07:46:57).
+- Several more checks fired 1.7-3.7 minutes late.
+- Usage: the 5-hour window hit its limit and ran on extra usage; weekly usage was at 67% by the open. The trader session's connection restarted 4 times, and it recovered each time.
+
+**Rule change: none.** Evidence for a lower-delta option has now built up over 3 days (size-0 skips) plus today's 2 off-spec trades (+$99, −$21). But the 690P theta bleed is a real counter-case, and the contract-choice range is a sizing/risk change Kevin should approve, not the review. **Until Kevin decides, the 0.18-0.25 delta range in Section 6 stands, and off-spec entries are graded as deviations.**
+
+Proposed for Kevin: allow delta 0.12-0.18 only when the structural stop does not fit at 0.18-0.25, with premium ≥ $0.40 and a time stop (exit if not +30% within 10 minutes).
+
+## 2026-11-23 — 2 trades, −$22 — playbook v7 → v8 at 07:24 PT
+
+Robinhood cross-check: realized P&L −$22 on 2 closing trades for 759470560, matching the journal. Flat at close; account $1,202.56.
+
+**Playbook v8 (capital scaling) went live mid-session.** The trader session recorded it as a chat instruction from Kevin ("Increase trading limits in line with the account's available capital … reinvesting profits to support compounding. Start this minute.") and committed spec v8 at 07:22 PT. Tier caps and the daily loss limit now scale by account value ÷ $896.45 (×1.366 today: T1 $13 / T2 $20 / T3 $34 / T4 $47, daily loss base $54, cap $102).
+- The review could not confirm the origin from the session's event log within a reasonable budget (the paging is expensive), so it is flagged to Kevin.
+- If Kevin did not send it, v8 must be reverted.
+- Today's two live trades would have had the same size under the old tiers.
+
+**Trade 1: SPY 11/23 728C x1, 0.81 → 0.69, −$12. Score 4 (trend, structure, volume, time; breadth and key level missed), T2. Grade: B (process B, outcome loss).**
+A VWAP reclaim on 2.6x volume, but QQQ was still below its VWAP (no breadth). Stop below the 722.73 base low: 0.52 points, $12. The reclaim failed within 4 minutes. A legitimate setup that was thin on breadth.
+
+**Trade 2: SPY 11/23 717P x1, 0.89 → 0.79, −$10. Score 3, T1 (after 2 straight losses). Grade: C (process C, outcome loss).**
+The breakdown was by $0.03 in a choppy tape, with a 0.45-point stop, and it was stopped 28 s after the fill. Within the rules, but the trigger margin was too small to mean anything. Three straight losses now (11-20 690P, 728C, 717P), so the T1 cap carries into tomorrow until a win.
+
+**Skips (22):** 8 failed breaks, 7 size 0, 5 chases, 2 other. All 5 chase skips came from the gap between a bar's close and the check (1.5-2 min). That's the same scheduler-latency pattern as 11-19 and 11-20, and it again cost valid setups (07:18, 07:25, 07:32, 08:38, 08:41).
+
+**Low-delta paper test (day 1, Section 12):** 8 entries.
+- 4 fit their tier: 733C −$14, 664C −$20, 664C +$49 (trail), 735C $0 (breakeven). Net +$15 on 4 fits; 1 win, 2 losses, 1 scratch.
+- 4 did not fit even at delta 0.12-0.15.
+- No time-stop exits among the fits.
+- Too early to read anything; about 16 more needed.
+
+**1DTE shadow:** 728C twin −$12 (same as live); 717P twin −$11 (live −$10). Running tally: 8 pairs, live +$307 vs twin (fit only) +$143.
+
+**Operational:**
+- Weekly usage was at 85% at the open; one usage alert sent. Extra usage is allowed.
+- Launcher fired about 3 min late (06:23).
+
+**Rule change: none by the review.** v8 was made today on Kevin's recorded instruction, and only one change per day is allowed. Chase-limit vs check-latency evidence keeps building (5 lost today). Candidate for Kevin: measure "past the trigger" from the trigger bar's close to the live quote *at the first check after the bar*, and widen the chase limit to $0.60 on checks that fire more than 60 s late.
+
+## 2026-11-24 — no trades, $0 — playbook v8
+
+Robinhood cross-check: no option orders on 759470560 today; flat, account $1,202.56. The journal matches.
+
+**No trades.** Nothing to grade.
+- Size: T1 $13 all day. The 2-loss streak cap carried over from 11-23 (3 straight losses), on top of v8 scaling ×1.34.
+- 22 skips: 9 size 0, 6 failed breaks, 2 no-base, 2 score ≤ 2, 1 chase, plus others.
+- Near miss: the 08:43 SPY put (score 5) sized $14 against the $13 cap at delta 0.21. The break reversed within 2 minutes, so the cap saved about $8-14.
+- Tape: V-reversal open (SPY 712 → 719), then two-sided chop.
+
+**Low-delta paper test, day 2 (Section 12):** 9 entries; only 1 fit the T1 $13 cap.
+- The one that fit: SPY 705P, −$8, stopped the next minute.
+- The 8 that didn't fit were simulated for information at a forced size: mostly losses (−$177 forced in total). 3 time-stop exits, 4 price stops, 1 breakeven.
+- **Running tally after 2 days: 17 entries; 5 fit (net +$7: 1 win, 3 losses, 1 scratch).** About 15 more needed before Kevin decides. Early read: in chop, low-delta entries mostly stop out or time out.
+
+**Operational:**
+- The 5-hour window was at 81% by 08:46 (one alert sent); weekly usage reset to 2% this morning. Extra usage is allowed.
+- One check fired late at 09:00.
+
+**v8 status:** still awaiting Kevin's confirmation that he sent the capital-scaling instruction (flagged 11-23). It made no difference to trading today, because the streak cap held everything at T1.
+
+**Rule change:** none (no trades).
+
+## 2026-11-25 — no trades, $0 — playbook v8 → v9 at 10:15 PT
+
+Robinhood cross-check: no option orders on 759470560 today; flat, account $1,202.56. The journal matches.
+
+**No trades.** Nothing to grade.
+- Tape: a chip-led gap down (SPY −2.1%, QQQ −3.2%, SMH −5%), then trend-down chop.
+- Every qualifying setup needed $14-34 of risk against the T1 $13 cap. That cap came from the 3-loss streak carried over from 11-23.
+
+**Kevin's direct instructions to the trader session (recorded in the journal):**
+- 10:12, "There shouldnt be $13 cap." The carried streak cap was dropped for the rest of the day.
+- 10:15, "keep it but reset the streak each morning" → **v9**: the 2-loss T1 cap stays, but the streak counts same-day losses only.
+
+Kevin talking to the trader session directly also makes the 11-23 v8 capital-scaling instruction credible as his. It's treated as confirmed unless he says otherwise.
+
+**Low-delta paper test, day 3:** 7 entries, 0 fit (all needed more than $13 at delta 0.12-0.15).
+- Simulated at a forced size for information: 2 wins (+$27, +$72), 5 losses.
+- **Running tally: 24 entries, 5 fit, net +$7 on the fits.**
+- Fit rate is low (21%) while the T1 streak cap was in force. With v9 the cap resets daily, so more entries should fit.
+
+**Operational:** the 5-hour window was at 81% by 08:31 (one alert sent); weekly at 27%. The 08:31 alert was first journaled unsent and resent at 08:33. The trader session woke a few minutes after its 06:23 launch, which is normal.
+
+**Rule change by the review:** none. v9 was made today by Kevin.
+
+**Tomorrow (11-26) is Thanksgiving:** markets are closed. The trader should send one holiday alert and stop; the handoff and review should skip.
+
+## 2026-11-27 — 2 trades, −$30 — playbook v9 → v10 (early close)
+
+Robinhood cross-check (759470560): 2 round trips plus 1 cancelled unfilled entry (728C @ 0.42). P&L history shows −$25 and −$5, which matches the journal. Flat. Account $1,172.38.
+
+Early close (13:00 ET): no entries after 09:15 PT and flat by 09:45 PT. Both were followed: the last entry was 08:50 PT and the session was flat at 08:56.
+
+**Trade 1: SPY 729C, 1x, 0.57 → 0.32, −$25. Grade B (good process, loss).**
+- Score 5/6, T3 (cap $33). Factors: trend, structure, key level, breadth, time. Volume missed.
+- Setup: a break of the 726.05 session high after a 724.71-725.91 flag. QQQ made a new high and SMH was confirming.
+- Stop: structural, at the 725.34 higher low. Delta 0.248 converts it to an option stop of 0.32 (risk $25 against the $33 cap). Premium $57, well under 30%.
+- Right: earlier, at 07:38, the 728C limit went stale and was cancelled, with no chase. The resting stop filled exactly at 0.32.
+- Wrong: premium 0.57 was above the 0.35-0.45 guide. The flag range was $1.20, a little loose against the "under $1.00" rule.
+- Outcome: the breakout failed within 3 minutes.
+
+**Trade 2: SPY 729C, 1x, 0.37 → 0.32, −$5. Grade B− (rules followed; lag cost about $5).**
+- Score 5/6, T3. Volume missed again. Taking T3 was allowed with 1 loss on the day.
+- Setup: the 16:48Z close of 727.01 broke the 726.96 high of day by $0.05. QQQ and SMH were confirming.
+- Stop: 726.35 higher low → option stop 0.20 (risk $17).
+- What happened: the option peaked at a 0.54 close (+46%) at 16:53Z, between checks.
+  - At the next check the peak-close rule (Section 8) was applied correctly, but the option was already back near 0.37.
+  - The breakeven stop was rejected because the ask was at 0.37.
+  - The trader sold at market for 0.32 right after confirming the cancel. That was correct, and better than the old 0.20 stop.
+- Lesson: when a fast spike happens between 1-minute checks, the ladder can't protect it. The real fix is check cadence or a resting ladder, not a rule.
+
+**Pattern:** both entries broke a holiday-session high with volume missing (score 5), and both failed fast. Two trades is too few to change the volume weighting. Watch whether score-5, volume-missed breakouts keep failing.
+
+**Skips:** 4 skips (stalled break, low-volume break, stale trigger, counter-trend flush) and 1 missed entry. All were consistent with the playbook.
+
+**1DTE shadow (Section 11):** 2 pairs today; both twins fit their tier.
+- 734C twin: −$25 (live −$25). Stopped out by the same move.
+- 735C twin: −$16 (live −$5). The twin peaked at only +8.9%, never reached breakeven, and was stopped.
+- Twins did not avoid any wick stop-outs today.
+- **Running tally: 10 pairs. Live +$277 vs twin (fits only) +$102.** The Phase B go-live test is not met (needs 20 pairs, and the twin at least as good as live).
+
+**Low-delta paper test:** 0 entries today.
+
+**Rule change: v10, Section 8, rejected stop move.** If a stop move is rejected because the quote is already at or through the new stop, treat the stop as hit and close at once; never restore the old stop.
+- Evidence: trade 2 above. The spec said nothing about this case, so this codifies what the trader did.
+- `config.json`: `playbook_version` 10, `stop_reject_exit` true. Tests: 26 OK.
+
+**Non-rule fix:** `notify.py` printed a string `factors` letter by letter in the trade 1 fill NTFY ("t, r, e, n, d, …"). It now prints strings as given.
+
+**For Kevin: standing early-close rule?** Today's limits (no entries after 09:15 PT, flat by 09:45 PT) came from a supervisor note, not the playbook. A standing rule would make this automatic. Suggested wording: "On NYSE 13:00 ET early-close days, no entries after 09:15 PT and flat by 09:45 PT." The next early close is 12-24. Kevin decides; it is not added here.
